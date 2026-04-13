@@ -111,3 +111,17 @@ export async function fetchCatalog() {
 
   return response.json();
 }
+
+export async function fetchShippingOptions() {
+  const response = await fetch(`${API_URL}/shipping/public-options/${COMPANY_ID}`, {
+    headers: getPublicHeaders(),
+    next: { revalidate: 3600 },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch shipping options");
+  }
+
+  const result = await response.json();
+  return result;
+}

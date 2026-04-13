@@ -14,6 +14,7 @@ export async function POST(request: Request) {
           price: item.price 
         },
         qty: item.quantity,
+        productVariantId: item.productVariantId,
       })),
       customerData: {
         name: body.customer.name.split(' ')[0] || "Cliente",
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
         notes: body.customer.notes,
         deliveryType: body.shipping.method === 'pickup' ? 'pickup' : 'delivery',
       },
+      deliveryCost: body.shipping.cost,
     }
 
     const result = await createOrder(crmOrderData)

@@ -64,7 +64,7 @@ export function CartDrawer() {
               <div className="space-y-4">
                 {items.map((item) => (
                   <div
-                    key={item.id}
+                    key={`${item.id}-${item.selectedVariantId || "default"}`}
                     className="flex gap-4 rounded-lg border border-border p-4"
                   >
                     <div className="flex h-20 w-20 items-center justify-center rounded-md bg-secondary">
@@ -84,7 +84,7 @@ export function CartDrawer() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 -mr-2 -mt-2"
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeItem(item.id, item.selectedVariantId)}
                         >
                           <X className="h-4 w-4" />
                           <span className="sr-only">Eliminar</span>
@@ -97,7 +97,11 @@ export function CartDrawer() {
                             size="icon"
                             className="h-8 w-8"
                             onClick={() =>
-                              updateQuantity(item.id, item.quantity - 1)
+                              updateQuantity(
+                                item.id,
+                                item.quantity - 1,
+                                item.selectedVariantId,
+                              )
                             }
                           >
                             <Minus className="h-3 w-3" />
@@ -111,7 +115,11 @@ export function CartDrawer() {
                             size="icon"
                             className="h-8 w-8"
                             onClick={() =>
-                              updateQuantity(item.id, item.quantity + 1)
+                              updateQuantity(
+                                item.id,
+                                item.quantity + 1,
+                                item.selectedVariantId,
+                              )
                             }
                           >
                             <Plus className="h-3 w-3" />
