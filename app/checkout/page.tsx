@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/lib/cart-context"
+import { fetchCatalog } from "@/lib/api-service"
+import { useEffect } from "react"
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('es-AR', {
@@ -26,9 +28,8 @@ const shippingOptions = [
   { id: "pickup", name: "Retiro en local", price: 0, time: "Disponible en 24hs" },
 ]
 
-const paymentMethods = [
+const initialPaymentMethods = [
   { id: "transfer", name: "Transferencia bancaria", description: "Datos enviados al confirmar" },
-  { id: "mercadopago", name: "Mercado Pago", description: "Tarjetas, efectivo, cuotas" },
 ]
 
 export default function CheckoutPage() {
@@ -36,7 +37,40 @@ export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [paymentMethods, setPaymentMethods] = useState(initialPaymentMethods)
   
+  useEffect(() => {
+    const loadCatalog = async () => {
+      try {
+        const catalog = await fetchCatalog()
+        if (catalog.enabledPaymentMethods && Array.isArray(catalog.enabledPaymentMethods)) {
+          const methods = [...initialPaymentMethods]
+          if (catalog.enabledPaymentMethods.includes("mercadopago")) {
+            methods.push({ id: "mercadopago", name: "Mercado Pago", description: "Tarjetas, efectivo, cuotas" })
+          }
+          if (catalog.enabledPaymentMethods.includes("MODO")) {
+            methods.push({ id: "MODO", name: "MODO", description: "Paga con tu billetera MODO" })
+          }
+           // Si no hay métodos habilitados (pero el array existe), nos aseguramos de tener al menos transferencia
+          if (methods.length === 0) {
+             setPaymentMethods(initialPaymentMethods)
+          } else {
+             setPaymentMethods(methods)
+          }
+        } else {
+           // Fallback default
+           setPaymentMethods([
+             ...initialPaymentMethods,
+             { id: "mercadopago", name: "Mercado Pago", description: "Tarjetas, efectivo, cuotas" }
+           ])
+        }
+      } catch (error) {
+        console.error("Error loading catalog config:", error)
+      }
+    }
+    loadCatalog()
+  }, [])
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -87,6 +121,13 @@ export default function CheckoutPage() {
       })
 
       if (response.ok) {
+        const data = await response.json()
+        
+        if (data.checkoutUrl) {
+          window.location.href = data.checkoutUrl
+          return
+        }
+
         setIsSuccess(true)
         clearCart()
       }

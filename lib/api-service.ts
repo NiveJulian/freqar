@@ -98,3 +98,16 @@ export async function fetchProductById(productId: string) {
   const result = await response.json();
   return result.info.data;
 }
+
+export async function fetchCatalog() {
+  const response = await fetch(`${API_URL}/public-catalogs/${CATALOG_SLUG}`, {
+    headers: getPublicHeaders(),
+    next: { revalidate: 3600 },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch catalog config");
+  }
+
+  return response.json();
+}

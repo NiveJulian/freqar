@@ -1,5 +1,11 @@
-import Link from "next/link"
-import { Instagram, Linkedin, Mail } from "lucide-react"
+import Link from "next/link";
+import {
+  Instagram,
+  Linkedin,
+  Mail,
+  MessageCircleCodeIcon,
+  MessageCirclePlus,
+} from "lucide-react";
 
 const navigation = {
   productos: [
@@ -9,22 +15,26 @@ const navigation = {
     { name: "Madera", href: "#" },
   ],
   empresa: [
-    { name: "Nosotros", href: "#nosotros" },
-    { name: "Mayorista", href: "#mayorista" },
-    { name: "Contacto", href: "#contacto" },
+    { name: "Nosotros", href: "nosotros" },
+    { name: "Mayorista", href: "mayorista" },
+    { name: "Contacto", href: "contacto" },
     { name: "Catálogo PDF", href: "#" },
   ],
   legal: [
     { name: "Términos y condiciones", href: "#" },
     { name: "Política de privacidad", href: "#" },
   ],
-}
+};
 
 const social = [
-  { name: "Instagram", icon: Instagram, href: "#" },
-  { name: "LinkedIn", icon: Linkedin, href: "#" },
+  {
+    name: "Instagram",
+    icon: Instagram,
+    href: "https://www.instagram.com/freq.ar",
+  },
+  { name: "Whatsapp", icon: MessageCirclePlus, href: "#" },
   { name: "Email", icon: Mail, href: "mailto:ventas@freq.ar" },
-]
+];
 
 export function Footer() {
   return (
@@ -39,10 +49,10 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-              Grabados láser de precisión para empresas. 
-              Transformamos objetos en piezas únicas que comunican tu marca.
+              Grabados láser de precisión para empresas. Transformamos objetos
+              en piezas únicas que comunican tu marca.
             </p>
-            
+
             {/* Social */}
             <div className="mt-6 flex gap-4">
               {social.map((item) => (
@@ -66,8 +76,8 @@ export function Footer() {
             <ul className="mt-4 space-y-3">
               {navigation.productos.map((item) => (
                 <li key={item.name}>
-                  <Link 
-                    href={item.href} 
+                  <Link
+                    href={item.href}
                     className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {item.name}
@@ -85,8 +95,8 @@ export function Footer() {
             <ul className="mt-4 space-y-3">
               {navigation.empresa.map((item) => (
                 <li key={item.name}>
-                  <Link 
-                    href={item.href} 
+                  <Link
+                    href={item.href}
                     className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {item.name}
@@ -104,8 +114,8 @@ export function Footer() {
             <ul className="mt-4 space-y-3">
               {navigation.legal.map((item) => (
                 <li key={item.name}>
-                  <Link 
-                    href={item.href} 
+                  <Link
+                    href={item.href}
                     className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {item.name}
@@ -117,7 +127,9 @@ export function Footer() {
             {/* B2B Badge */}
             <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-border px-4 py-2">
               <div className="h-2 w-2 rounded-full bg-foreground" />
-              <span className="text-xs text-muted-foreground">Solo mayorista</span>
+              <span className="text-xs text-muted-foreground">
+                Solo mayorista
+              </span>
             </div>
           </div>
         </div>
@@ -133,5 +145,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

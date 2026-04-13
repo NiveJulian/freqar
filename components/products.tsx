@@ -25,10 +25,12 @@ const mapCrmProduct = (crmProd: any): Product => ({
   category: crmProd.CategoryProduct?.[0]?.category?.name?.toLowerCase() || "otros",
   description: crmProd.description || crmProd.name,
   price: crmProd.sellingPrice || 0,
-  originalPrice: null, // CRM might not have this directly in simple fetch
+  originalPrice: null,
   stock: (crmProd.stock || 0) > 0,
   badge: crmProd.outstanding ? "Destacado" : null,
-  image: crmProd.images?.[0]?.url || "/products/placeholder.jpg"
+  image: crmProd.images?.[0]?.url || "/products/placeholder.jpg",
+  variantGroups: crmProd.variantGroups || [],
+  variants: crmProd.variants || []
 })
 
 const formatPrice = (price: number) => {
@@ -43,11 +45,43 @@ function ProductCard({ product }: { product: Product }) {
   const { addItem, items } = useCart()
   const [justAdded, setJustAdded] = useState(false)
   
-  const isInCart = items.some(item => item.id === product.id)
-  const quantity = items.find(item => item.id === product.id)?.quantity || 0
+  // Encontrar el grupo de color
+  const colorGroup = product.variantGroups?.find(g => 
+    g.name.toLowerCase().includes('color') || g.kind === 'COLOR'
+  )
+  
+  const [selectedColorOptionId, setSelectedColorOptionId] = useState<string | null>(
+    colorGroup?.options?.[0]?.id || null
+  )
+
+  // Encontrar la variante activa basada en el color seleccionado
+  const activeVariant = product.variants?.find(v => 
+    !selectedColorOptionId || v.optionLinks?.some((link: any) => link.optionId === selectedColorOptionId)
+  )
+
+  // Usar imagen de la opción si existe, sino la del producto
+  const selectedOptionInfo = colorGroup?.options?.find((o: any) => o.id === selectedColorOptionId)
+  const displayImage = selectedOptionInfo?.imageUrl || selectedOptionInfo?.imageUrls?.[0] || product.image
+  
+  const hasStock = activeVariant ? activeVariant.stock > 0 : product.stock
+  
+  const isInCart = items.some(item => 
+    item.id === product.id && 
+    item.selectedVariantId === activeVariant?.id
+  )
+  const quantity = items.find(item => 
+    item.id === product.id && 
+    item.selectedVariantId === activeVariant?.id
+  )?.quantity || 0
 
   const handleAdd = () => {
-    addItem(product)
+    addItem({
+      ...product,
+      image: displayImage,
+      selectedVariantId: activeVariant?.id,
+      variantName: activeVariant?.name,
+      stock: hasStock
+    })
     setJustAdded(true)
     setTimeout(() => setJustAdded(false), 1500)
   }
@@ -56,20 +90,20 @@ function ProductCard({ product }: { product: Product }) {
     <div
       className={cn(
         "group relative overflow-hidden rounded-lg border border-border bg-card transition-all hover:border-foreground/50",
-        !product.stock && "opacity-60"
+        !hasStock && "opacity-60"
       )}
     >
       {/* Badge */}
       {product.badge && (
         <div className="absolute top-4 left-4 z-10">
           <Badge 
-            variant={product.badge === "Agotado" ? "secondary" : "default"}
+            variant={product.badge === "Agotado" || !hasStock ? "secondary" : "default"}
             className={cn(
               "font-semibold shadow-sm",
               product.badge === "Nuevo" ? "bg-blue-500 hover:bg-blue-600" : ""
             )}
           >
-            {product.badge}
+            {!hasStock ? "Agotado" : product.badge}
           </Badge>
         </div>
       )}
@@ -77,8 +111,8 @@ function ProductCard({ product }: { product: Product }) {
       {/* Cart indicator */}
       {isInCart && (
         <div className="absolute top-4 right-4 z-10">
-          <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm animate-in fade-in zoom-in">
-            <Check className="h-3 w-3 mr-1" />
+          <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm animate-in fade-in zoom-in border-primary/20">
+            <Check className="h-3 w-3 mr-1 text-primary" />
             {quantity}
           </Badge>
         </div>
@@ -88,7 +122,7 @@ function ProductCard({ product }: { product: Product }) {
       <div className="aspect-square w-full overflow-hidden bg-secondary relative">
         <Link href={`/product/${product.id}`} className="block h-full w-full">
           <img
-            src={product.image}
+            src={displayImage}
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
@@ -110,7 +144,7 @@ function ProductCard({ product }: { product: Product }) {
             size="icon" 
             className="h-10 w-10 rounded-full shadow-lg hover:scale-110 transition-transform"
             onClick={handleAdd}
-            disabled={!product.stock}
+            disabled={!hasStock}
           >
             <ShoppingCart className="h-5 w-5" />
           </Button>
@@ -118,40 +152,75 @@ function ProductCard({ product }: { product: Product }) {
       </div>
 
       {/* Content */}
-      <div className="p-6">
+      <div className="p-5 flex flex-col gap-3">
         <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-            {product.category}
-          </p>
-          <Link href={`/product/${product.id}`} className="hover:underline">
-            <h3 className="text-lg font-semibold text-foreground line-clamp-1">
-              {product.name}
-            </h3>
-          </Link>
-          <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-            {product.description}
-          </p>
-        </div>
-
-        <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-          <div className="flex items-baseline gap-2">
-            <span className="text-xl font-bold text-foreground">
-              {formatPrice(product.price)}
-            </span>
-            {product.originalPrice && (
-              <span className="text-sm text-muted-foreground line-through">
-                {formatPrice(product.originalPrice)}
+          <div className="flex justify-between items-start mb-1">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+              {product.category}
+            </p>
+            {activeVariant?.name && (
+              <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded text-secondary-foreground font-medium uppercase tracking-tighter">
+                {activeVariant.name}
               </span>
             )}
           </div>
+          <Link href={`/product/${product.id}`} className="hover:underline">
+            <h3 className="text-base font-bold text-foreground line-clamp-1">
+              {product.name}
+            </h3>
+          </Link>
+        </div>
+
+        {/* Color Selector */}
+        {colorGroup && colorGroup.options.length > 0 && (
+          <div className="flex flex-wrap gap-2 py-1">
+            {colorGroup.options.map((option: any) => (
+              <button
+                key={option.id}
+                onClick={() => setSelectedColorOptionId(option.id)}
+                className={cn(
+                  "relative h-6 w-6 rounded-full border border-border flex items-center justify-center transition-all hover:scale-110 ring-offset-background",
+                  selectedColorOptionId === option.id && "ring-2 ring-primary ring-offset-1 scale-110 shadow-sm"
+                )}
+                title={option.name}
+              >
+                <span 
+                  className="h-full w-full rounded-full border border-black/5" 
+                  style={{ backgroundColor: option.colorHex || '#ccc' }}
+                />
+                {selectedColorOptionId === option.id && (
+                  <Check className={cn(
+                    "h-3 w-3 absolute inset-0 m-auto",
+                    // Invert color for check if it's too light (approximation)
+                    option.colorHex?.toLowerCase() === '#ffffff' ? "text-black" : "text-white"
+                  )} />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-border/50">
+          <div className="flex flex-col">
+            <span className="text-lg font-black text-foreground">
+              {formatPrice(product.price)}
+            </span>
+          </div>
           <Button 
             size="sm" 
-            variant={product.stock ? (justAdded ? "secondary" : "default") : "secondary"}
-            disabled={!product.stock}
-            className="h-9"
+            variant={hasStock ? (justAdded ? "secondary" : "default") : "secondary"}
+            disabled={!hasStock}
+            className={cn(
+              "h-8 px-4 text-xs font-bold transition-all",
+              justAdded && "bg-green-500 hover:bg-green-600 text-white border-none scale-105"
+            )}
             onClick={handleAdd}
           >
-            {!product.stock ? "Agotado" : justAdded ? "Agregado" : "Agregar"}
+            {!hasStock ? "Agotado" : justAdded ? (
+              <span className="flex items-center gap-1">
+                <Check className="h-3 w-3" /> ¡Listo!
+              </span>
+            ) : "Agregar"}
           </Button>
         </div>
       </div>

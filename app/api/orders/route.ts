@@ -32,6 +32,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       success: true, 
       orderNumber: result.correlative,
+      checkoutUrl: result.mercadopagoPreference?.redirectUrl || result.modoIntention?.checkoutUrl,
       message: "Pedido recibido correctamente" 
     })
   } catch (error: any) {

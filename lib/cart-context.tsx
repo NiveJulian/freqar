@@ -12,6 +12,11 @@ export interface Product {
   stock: boolean
   badge: string | null
   image: string
+  // Support for variants
+  variantGroups?: any[]
+  variants?: any[]
+  selectedVariantId?: string
+  variantName?: string
 }
 
 export interface CartItem extends Product {
@@ -21,8 +26,8 @@ export interface CartItem extends Product {
 interface CartContextType {
   items: CartItem[]
   addItem: (product: Product) => void
-  removeItem: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
+  removeItem: (productId: string, variantId?: string) => void
+  updateQuantity: (productId: string, quantity: number, variantId?: string) => void
   clearCart: () => void
   totalItems: number
   totalPrice: number
@@ -38,10 +43,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback((product: Product) => {
     setItems((current) => {
-      const existingItem = current.find((item) => item.id === product.id)
+      const existingItem = current.find(
+        (item) => item.id === product.id && item.selectedVariantId === product.selectedVariantId
+      )
       if (existingItem) {
         return current.map((item) =>
-          item.id === product.id
+          item.id === product.id && item.selectedVariantId === product.selectedVariantId
             ? { ...item, quantity: item.quantity + 1 }
             : item
         )
@@ -51,18 +58,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setIsOpen(true)
   }, [])
 
-  const removeItem = useCallback((productId: string) => {
-    setItems((current) => current.filter((item) => item.id !== productId))
+  const removeItem = useCallback((productId: string, variantId?: string) => {
+    setItems((current) => 
+      current.filter((item) => !(item.id === productId && item.selectedVariantId === variantId))
+    )
   }, [])
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
+  const updateQuantity = useCallback((productId: string, quantity: number, variantId?: string) => {
     if (quantity < 1) {
-      removeItem(productId)
+      removeItem(productId, variantId)
       return
     }
     setItems((current) =>
       current.map((item) =>
-        item.id === productId ? { ...item, quantity } : item
+        item.id === productId && item.selectedVariantId === variantId ? { ...item, quantity } : item
       )
     )
   }, [removeItem])
