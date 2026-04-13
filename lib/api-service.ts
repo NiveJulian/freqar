@@ -9,19 +9,19 @@ const getPublicHeaders = () => {
     "Content-Type": "application/json",
     "x-company-id": COMPANY_ID,
   };
-  
+
   if (COMPANY_TOKEN) {
     headers["Authorization"] = `Bearer ${COMPANY_TOKEN}`;
     headers["x-company-token"] = COMPANY_TOKEN;
   }
-  
+
   return headers;
 };
 
 export async function fetchCategories() {
   const response = await fetch(`${API_URL}/categories`, {
     headers: getPublicHeaders(),
-    next: { revalidate: 3600 }, // Cache categories for 1 hour
+    next: { revalidate: 3600 },
   });
 
   if (!response.ok) {
