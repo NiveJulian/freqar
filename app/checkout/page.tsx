@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/lib/cart-context"
+import { fetchCatalog, fetchShippingOptions, createOrder } from "@/lib/api-service"
+import { useEffect } from "react"
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('es-AR', {
@@ -20,15 +22,12 @@ const formatPrice = (price: number) => {
   }).format(price)
 }
 
-const shippingOptions = [
-  { id: "standard", name: "Envío estándar", price: 3500, time: "5-7 días hábiles" },
-  { id: "express", name: "Envío express", price: 6500, time: "2-3 días hábiles" },
+const defaultShippingOptions = [
   { id: "pickup", name: "Retiro en local", price: 0, time: "Disponible en 24hs" },
 ]
 
-const paymentMethods = [
+const initialPaymentMethods = [
   { id: "transfer", name: "Transferencia bancaria", description: "Datos enviados al confirmar" },
-  { id: "mercadopago", name: "Mercado Pago", description: "Tarjetas, efectivo, cuotas" },
 ]
 
 export default function CheckoutPage() {
@@ -36,7 +35,58 @@ export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [paymentMethods, setPaymentMethods] = useState(initialPaymentMethods)
+  const [shippingOptions, setShippingOptions] = useState(defaultShippingOptions)
   
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [catalog, options] = await Promise.all([
+          fetchCatalog(),
+          fetchShippingOptions()
+        ])
+
+        if (options && Array.isArray(options) && options.length > 0) {
+          // Unimos los del backend con el de retiro local por defecto
+          setShippingOptions([
+            ...options.map((opt: any) => ({
+              id: opt.id.toString(),
+              name: opt.name,
+              price: opt.price,
+              time: opt.time || "Consultar plazo"
+            })),
+            ...defaultShippingOptions
+          ])
+        }
+
+        if (catalog.enabledPaymentMethods && Array.isArray(catalog.enabledPaymentMethods)) {
+          const methods = [...initialPaymentMethods]
+          if (catalog.enabledPaymentMethods.includes("mercadopago")) {
+            methods.push({ id: "mercadopago", name: "Mercado Pago", description: "Tarjetas, efectivo, cuotas" })
+          }
+          if (catalog.enabledPaymentMethods.includes("MODO")) {
+            methods.push({ id: "MODO", name: "MODO", description: "Paga con tu billetera MODO" })
+          }
+           // Si no hay métodos habilitados (pero el array existe), nos aseguramos de tener al menos transferencia
+          if (methods.length === 0) {
+             setPaymentMethods(initialPaymentMethods)
+          } else {
+             setPaymentMethods(methods)
+          }
+        } else {
+           // Fallback default
+           setPaymentMethods([
+             ...initialPaymentMethods,
+             { id: "mercadopago", name: "Mercado Pago", description: "Tarjetas, efectivo, cuotas" }
+           ])
+        }
+      } catch (error) {
+        console.error("Error loading config:", error)
+      }
+    }
+    loadData()
+  }, [])
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -45,7 +95,7 @@ export default function CheckoutPage() {
     city: "",
     postalCode: "",
     notes: "",
-    shipping: "standard",
+    shipping: "pickup",
     payment: "transfer",
   })
 
@@ -55,43 +105,46 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-
     try {
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customer: {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            address: formData.address,
-            city: formData.city,
-            postalCode: formData.postalCode,
-            notes: formData.notes,
+      const crmOrderData = {
+        cart: items.map((item) => ({
+          product: { 
+            id: item.id.toString(), 
+            name: item.name, 
+            price: item.price 
           },
-          items: items.map(item => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-          })),
-          shipping: {
-            method: formData.shipping,
-            cost: shippingCost,
-          },
-          payment: formData.payment,
-          subtotal: totalPrice,
-          total: finalTotal,
-        }),
-      })
+          qty: item.quantity,
+          productVariantId: item.selectedVariantId,
+        })),
+        customerData: {
+          name: formData.name.split(' ')[0] || "Cliente",
+          lastName: formData.name.split(' ').slice(1).join(' ') || "Ecommerce",
+          email: formData.email,
+          phone: formData.phone,
+          address: `${formData.address}, ${formData.city} (${formData.postalCode})`,
+          paymentMethod: formData.payment,
+          notes: formData.notes,
+          deliveryType: formData.shipping === 'pickup' ? 'pickup' : 'delivery',
+        },
+        deliveryCost: shippingCost,
+      }
 
-      if (response.ok) {
+      const result = await createOrder(crmOrderData)
+
+      if (result) {
+        const checkoutUrl = result.mercadopagoPreference?.redirectUrl || result.modoIntention?.checkoutUrl;
+        
+        if (checkoutUrl) {
+          window.location.href = checkoutUrl
+          return
+        }
+
         setIsSuccess(true)
         clearCart()
       }
-    } catch (error) {
-      console.error("Error al enviar pedido:", error)
+    } catch (error: any) {
+      console.error("Error creating order:", error)
+      alert(error.message || "Error al procesar el pedido")
     } finally {
       setIsSubmitting(false)
     }
@@ -325,7 +378,7 @@ export default function CheckoutPage() {
                 
                 <div className="space-y-4 mb-6">
                   {items.map((item) => (
-                    <div key={item.id} className="flex gap-4">
+                    <div key={`${item.id}-${item.selectedVariantId || 'default'}`} className="flex gap-4">
                       <div className="flex h-16 w-16 items-center justify-center rounded-md bg-secondary shrink-0">
                         <Package className="h-6 w-6 text-muted-foreground/50" />
                       </div>

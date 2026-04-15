@@ -9,19 +9,19 @@ const getPublicHeaders = () => {
     "Content-Type": "application/json",
     "x-company-id": COMPANY_ID,
   };
-  
+
   if (COMPANY_TOKEN) {
     headers["Authorization"] = `Bearer ${COMPANY_TOKEN}`;
     headers["x-company-token"] = COMPANY_TOKEN;
   }
-  
+
   return headers;
 };
 
 export async function fetchCategories() {
   const response = await fetch(`${API_URL}/categories`, {
     headers: getPublicHeaders(),
-    next: { revalidate: 3600 }, // Cache categories for 1 hour
+    next: { revalidate: 3600 },
   });
 
   if (!response.ok) {
@@ -97,4 +97,31 @@ export async function fetchProductById(productId: string) {
 
   const result = await response.json();
   return result.info.data;
+}
+
+export async function fetchCatalog() {
+  const response = await fetch(`${API_URL}/public-catalogs/${CATALOG_SLUG}`, {
+    headers: getPublicHeaders(),
+    next: { revalidate: 3600 },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch catalog config");
+  }
+
+  return response.json();
+}
+
+export async function fetchShippingOptions() {
+  const response = await fetch(`${API_URL}/shipping/public-options/${COMPANY_ID}`, {
+    headers: getPublicHeaders(),
+    next: { revalidate: 3600 },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch shipping options");
+  }
+
+  const result = await response.json();
+  return result;
 }

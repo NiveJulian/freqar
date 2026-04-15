@@ -14,6 +14,7 @@ export async function POST(request: Request) {
           price: item.price 
         },
         qty: item.quantity,
+        productVariantId: item.productVariantId,
       })),
       customerData: {
         name: body.customer.name.split(' ')[0] || "Cliente",
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
         notes: body.customer.notes,
         deliveryType: body.shipping.method === 'pickup' ? 'pickup' : 'delivery',
       },
+      deliveryCost: body.shipping.cost,
     }
 
     const result = await createOrder(crmOrderData)
@@ -32,6 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       success: true, 
       orderNumber: result.correlative,
+      checkoutUrl: result.mercadopagoPreference?.redirectUrl || result.modoIntention?.checkoutUrl,
       message: "Pedido recibido correctamente" 
     })
   } catch (error: any) {
