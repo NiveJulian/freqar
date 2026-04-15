@@ -15,9 +15,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "FREQ.AR | Grabados Láser a Medida para Empresas",
+  title: "FREQ.AR | Grabados Láser",
   description:
-    "Grabados láser personalizados al por mayor para empresas. Vasos, termos, mates, madera y más. Merchandising corporativo de alta calidad.",
+    "Grabados láser personalizados al por menor y por mayor para empresas. Vasos, termos, mates, madera y más. Merchandising corporativo de alta calidad.",
   generator: "atomsolucionesit.com.ar",
   keywords: [
     "grabados láser",
