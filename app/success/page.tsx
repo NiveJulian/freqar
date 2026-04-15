@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -19,7 +19,7 @@ import {
   syncMercadoPagoReturn,
 } from "@/lib/mercadopago";
 
-export default function SuccessPage() {
+function SuccessContent() {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
   const syncedRef = useRef(false);
@@ -86,96 +86,63 @@ export default function SuccessPage() {
   );
 
   return (
-    <main className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <div className="flex-1 flex flex-col items-center justify-center py-24 px-6 text-center">
-        <div className="relative mb-8">
-          <div className="absolute inset-0 animate-ping rounded-full bg-green-500/20" />
-          <div className="relative rounded-full bg-green-100 p-6">
-            <CheckCircle2 className="h-20 w-20 text-green-600" />
-          </div>
-        </div>
-
-        <h1 className="text-4xl font-black tracking-tight text-foreground sm:text-6xl mb-6">
-          {hasMercadoPagoData ? "Pago confirmado" : "Pago confirmado"}
-        </h1>
-
-        <p className="text-xl text-muted-foreground max-w-xl mb-12 text-balance">
-          {hasMercadoPagoData
-            ? "Estamos sincronizando los datos de tu pago mediante Mercado Pago."
-            : "Muchas gracias por tu confianza. Tu pedido ha sido procesado correctamente y ya estamos preparando todo."}
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-          <Button
-            asChild
-            size="lg"
-            className="rounded-full px-8 flex-1 bg-foreground text-background hover:bg-foreground/90 py-7 text-lg font-bold"
-          >
-            <Link href="/">Seguir comprando</Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-            className="rounded-full px-8 flex-1 py-7 text-lg font-bold"
-          >
-            <Link href="/" className="flex items-center justify-center gap-2">
-              Ir al inicio <ArrowRight className="h-5 w-5" />
-            </Link>
-          </Button>
-        </div>
-
-        {/* <div className="mt-10 w-full max-w-2xl rounded-2xl border border-border bg-card p-6 text-left shadow-sm">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="rounded-full bg-green-100 p-2">
-              <RefreshCcw className="h-5 w-5 text-green-700" />
-            </div>
-            <div>
-              <h2 className="font-bold text-lg">Estado de la sincronizacion</h2>
-              <p className="text-sm text-muted-foreground">
-                {syncStatus === "loading"
-                  ? "Confirmando pago con Mercado Pago y actualizando la venta."
-                  : syncStatus === "done"
-                    ? "La venta ya fue actualizada."
-                    : syncStatus === "error"
-                      ? "Hubo un problema al sincronizar el pago."
-                      : "Esperando datos del pago."}
-              </p>
-            </div>
-          </div>
-
-          {syncMessage ? (
-            <p className="mb-4 rounded-lg bg-secondary/60 px-4 py-3 text-sm text-foreground">
-              {syncMessage}
-            </p>
-          ) : null}
-
-          {hasMercadoPagoData ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Detail label="collection_id" value={mpPayload.collection_id} />
-              <Detail label="payment_id" value={mpPayload.payment_id} />
-              <Detail label="collection_status" value={mpPayload.collection_status} />
-              <Detail label="status" value={mpPayload.status} />
-              <Detail label="payment_type" value={mpPayload.payment_type} />
-              <Detail label="external_reference" value={mpPayload.external_reference} />
-            </div>
-          ) : (
-            <div className="rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
-              No llegaron parametros de Mercado Pago en esta vuelta.
-            </div>
-          )}
-        </div> */}
-
-        <div className="mt-16 p-6 rounded-2xl bg-secondary/50 border border-border max-w-lg">
-          <PartyPopper className="h-8 w-8 text-primary mx-auto mb-4" />
-          <h3 className="font-bold text-lg mb-2">¿Que sigue ahora?</h3>
-          <p className="text-sm text-muted-foreground">
-            Te mantendremos al tanto del estado de tu pedido a traves de
-            WhatsApp o el correo electronico que proporcionaste.
-          </p>
+    <div className="flex-1 flex flex-col items-center justify-center py-24 px-6 text-center">
+      <div className="relative mb-8">
+        <div className="absolute inset-0 animate-ping rounded-full bg-green-500/20" />
+        <div className="relative rounded-full bg-green-100 p-6">
+          <CheckCircle2 className="h-20 w-20 text-green-600" />
         </div>
       </div>
+
+      <h1 className="text-4xl font-black tracking-tight text-foreground sm:text-6xl mb-6">
+        {hasMercadoPagoData ? "Pago confirmado" : "Pago confirmado"}
+      </h1>
+
+      <p className="text-xl text-muted-foreground max-w-xl mb-12 text-balance">
+        {hasMercadoPagoData
+          ? "Estamos sincronizando los datos de tu pago mediante Mercado Pago."
+          : "Muchas gracias por tu confianza. Tu pedido ha sido procesado correctamente y ya estamos preparando todo."}
+      </p>
+
+      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+        <Button
+          asChild
+          size="lg"
+          className="rounded-full px-8 flex-1 bg-foreground text-background hover:bg-foreground/90 py-7 text-lg font-bold"
+        >
+          <Link href="/">Seguir comprando</Link>
+        </Button>
+        <Button
+          asChild
+          variant="outline"
+          size="lg"
+          className="rounded-full px-8 flex-1 py-7 text-lg font-bold"
+        >
+          <Link href="/" className="flex items-center justify-center gap-2">
+            Ir al inicio <ArrowRight className="h-5 w-5" />
+          </Link>
+        </Button>
+      </div>
+
+      <div className="mt-16 p-6 rounded-2xl bg-secondary/50 border border-border max-w-lg">
+        <PartyPopper className="h-8 w-8 text-primary mx-auto mb-4" />
+        <h3 className="font-bold text-lg mb-2">¿Que sigue ahora?</h3>
+        <p className="text-sm text-muted-foreground">
+          Te mantendremos al tanto del estado de tu pedido a traves de
+          WhatsApp o el correo electronico que proporcionaste.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <main className="min-h-screen bg-background flex flex-col">
+      <Header />
+      <Suspense fallback={<div className="flex-1 flex items-center justify-center">Cargando...</div>}>
+        <SuccessContent />
+      </Suspense>
       <Footer />
     </main>
   );
