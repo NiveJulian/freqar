@@ -102,7 +102,7 @@ export default function SuccessPage() {
 
         <p className="text-xl text-muted-foreground max-w-xl mb-12 text-balance">
           {hasMercadoPagoData
-            ? "Estamos sincronizando los datos que devolvio Mercado Pago para que la venta quede actualizada en el CRM."
+            ? "Estamos sincronizando los datos de tu pago mediante Mercado Pago."
             : "Muchas gracias por tu confianza. Tu pedido ha sido procesado correctamente y ya estamos preparando todo."}
         </p>
 
