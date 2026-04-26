@@ -125,6 +125,7 @@ export default function CheckoutPage() {
           paymentMethod: formData.payment,
           notes: formData.notes,
           deliveryType: formData.shipping === 'pickup' ? 'pickup' : 'delivery',
+          shippingMethodName: shippingOptions.find(s => s.id === formData.shipping)?.name || "Envío por defecto",
         },
         deliveryCost: shippingCost,
       }
