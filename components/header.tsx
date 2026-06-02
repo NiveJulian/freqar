@@ -11,10 +11,11 @@ import { useCart } from "@/lib/cart-context";
 import Image from "next/image";
 
 const navigation = [
-  { name: "Productos", href: "#productos" },
-  { name: "Personalizar", href: "#personalizador", badge: "Mayorista" },
-  { name: "Nosotros", href: "#nosotros" },
-  { name: "Contacto", href: "#contacto" },
+  { name: "Productos", href: "/#productos" },
+  { name: "Personalizar", href: "/#personalizador", badge: "Mayorista" },
+  { name: "Nosotros", href: "/#nosotros" },
+  { name: "Contacto", href: "/#contacto" },
+  { name: "Links", href: "/links" },
 ];
 
 export function Header() {
@@ -117,7 +118,7 @@ export function Header() {
             <span className="sr-only">Carrito</span>
           </Button>
           <Button size="sm" className="hidden lg:flex" asChild>
-            <Link href="#contacto">Contactar</Link>
+            <Link href="/#contacto">Contactar</Link>
           </Button>
 
           {/* Mobile Menu */}
@@ -150,7 +151,7 @@ export function Header() {
                 ))}
                 <div className="flex flex-col gap-3 pt-4">
                   <Button asChild>
-                    <Link href="#contacto" onClick={() => setIsOpen(false)}>
+                    <Link href="/#contacto" onClick={() => setIsOpen(false)}>
                       Contactar
                     </Link>
                   </Button>
