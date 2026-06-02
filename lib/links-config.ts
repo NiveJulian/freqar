@@ -22,11 +22,11 @@ export interface PetOwner {
 export const petOwners: PetOwner[] = [
   {
     id: "1",
-    ownerName: "Santi Insaurrualde",
+    ownerName: "Camila Schiber",
     petName: "Beto",
     petBreed: "Salchicha",
     petType: "dog",
-    phone: "5493772583027",
+    phone: "5493772530875",
     message: "¡Hola Santi! Encontré a tu perrito Beto. Por favor, comunícate conmigo para coordinar la entrega.",
     avatarUrl: "",
     status: "active",
@@ -44,11 +44,11 @@ export const petOwners: PetOwner[] = [
   },
   {
     id: "3",
-    ownerName: "Santi Insaurrualde",
+    ownerName: "Agustina Insaurrualde",
     petName: "Luna",
     petBreed: "Gato",
     petType: "dog",
-    phone: "5493772583027",
+    phone: "5493772430927",
     message: "¡Hola Santi! Encontré a tu perrito Luna. Escríbeme para coordinar la devolución.",
     avatarUrl: "",
     status: "active",
