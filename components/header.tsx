@@ -15,7 +15,7 @@ const navigation = [
   { name: "Personalizar", href: "/#personalizador", badge: "Mayorista" },
   { name: "Nosotros", href: "/#nosotros" },
   { name: "Contacto", href: "/#contacto" },
-  { name: "Links", href: "/links" },
+  // { name: "Links", href: "/links" },
 ];
 
 export function Header() {
