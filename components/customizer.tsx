@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Upload, Type, Image as ImageIcon, RotateCcw, Package, Building2, Users, BadgePercent, FileText } from "lucide-react"
+import { Upload, Type, Image as ImageIcon, RotateCcw, Package, Building2, Users, BadgePercent, FileText, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -94,6 +94,29 @@ export function Customizer() {
     ctx.fillText(text, textX, textY)
     ctx.shadowBlur = 0
   }
+
+  const handleSendWhatsApp = () => {
+    if (!companyName || !email || !quantity) {
+      alert("Por favor, completá los campos obligatorios: Empresa, Email y Cantidad.");
+      return;
+    }
+
+    const message = `¡Hola! Me interesa realizar una compra mayorista de productos personalizados:
+
+• *Producto:* ${selectedProduct.name}
+• *Cantidad:* ${quantity} unidades
+• *Empresa:* ${companyName}
+• *Email de contacto:* ${email}
+• *Texto de grabado:* "${text}"
+${notes ? `• *Notas adicionales:* ${notes}` : ""}
+
+Por favor, envíenme una cotización. ¡Gracias!`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/5493772625862?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, "_blank");
+  };
 
   const handleReset = () => {
     setText("TU LOGO")
@@ -350,8 +373,9 @@ export function Customizer() {
                 />
               </div>
 
-              <Button className="w-full" size="lg">
-                Solicitar cotización mayorista
+              <Button onClick={handleSendWhatsApp} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold gap-2" size="lg">
+                <MessageCircle className="h-5 w-5" />
+                Solicitar cotización mayorista por WhatsApp
               </Button>
 
               <p className="text-xs text-muted-foreground text-center">

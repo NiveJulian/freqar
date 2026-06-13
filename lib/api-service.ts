@@ -125,3 +125,28 @@ export async function fetchShippingOptions() {
   const result = await response.json();
   return result;
 }
+
+export async function uploadFile(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const headers: any = {};
+  if (COMPANY_TOKEN) {
+    headers["Authorization"] = `Bearer ${COMPANY_TOKEN}`;
+    headers["x-company-token"] = COMPANY_TOKEN;
+  }
+  headers["x-company-id"] = COMPANY_ID;
+
+  const response = await fetch(`${API_URL}/upload/image`, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || "Error al subir la imagen");
+  }
+
+  return response.json();
+}

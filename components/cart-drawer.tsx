@@ -64,33 +64,67 @@ export function CartDrawer() {
               <div className="space-y-4">
                 {items.map((item) => (
                   <div
-                    key={`${item.id}-${item.selectedVariantId || "default"}`}
+                    key={item.cartItemId}
                     className="flex gap-4 rounded-lg border border-border p-4"
                   >
-                    <div className="flex h-20 w-20 items-center justify-center rounded-md bg-secondary">
-                      <Package className="h-8 w-8 text-muted-foreground/50" />
+                    <div className="flex h-20 w-20 items-center justify-center rounded-md bg-secondary shrink-0 overflow-hidden">
+                      <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
                     </div>
                     <div className="flex flex-1 flex-col">
                       <div className="flex items-start justify-between">
-                        <div>
+                        <div className="space-y-1 max-w-[85%]">
                           <h4 className="font-medium text-foreground leading-tight">
                             {item.name}
                           </h4>
-                          <p className="text-xs text-muted-foreground mt-0.5">
+                          {item.variantName && (
+                            <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded text-secondary-foreground font-medium uppercase inline-block">
+                              {item.variantName}
+                            </span>
+                          )}
+                          <p className="text-xs text-muted-foreground line-clamp-1">
                             {item.description}
                           </p>
+
+                          {/* Customization Note and Images */}
+                          {(item.customizationNote || (item.customizationImages && item.customizationImages.length > 0)) && (
+                            <div className="mt-2 p-2 bg-secondary/50 rounded border border-border/40 space-y-1 text-[11px]">
+                              <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold block">
+                                Personalización:
+                              </span>
+                              {item.customizationNote && (
+                                <p className="italic text-foreground leading-tight">
+                                  "{item.customizationNote}"
+                                </p>
+                              )}
+                              {item.customizationImages && item.customizationImages.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {item.customizationImages.map((imgUrl, idx) => (
+                                    <a
+                                      key={idx}
+                                      href={imgUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="block border border-border/60 rounded overflow-hidden hover:scale-105 transition-all"
+                                    >
+                                      <img src={imgUrl} alt="custom design" className="w-8 h-8 object-cover" />
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 -mr-2 -mt-2"
-                          onClick={() => removeItem(item.id, item.selectedVariantId)}
+                          className="h-8 w-8 -mr-2 -mt-2 shrink-0 text-muted-foreground hover:text-foreground"
+                          onClick={() => removeItem(item.cartItemId)}
                         >
                           <X className="h-4 w-4" />
                           <span className="sr-only">Eliminar</span>
                         </Button>
                       </div>
-                      <div className="mt-auto flex items-center justify-between pt-2">
+                      <div className="mt-4 flex items-center justify-between pt-2 border-t border-border/30">
                         <div className="flex items-center gap-2">
                           <Button
                             variant="outline"
@@ -98,9 +132,8 @@ export function CartDrawer() {
                             className="h-8 w-8"
                             onClick={() =>
                               updateQuantity(
-                                item.id,
+                                item.cartItemId,
                                 item.quantity - 1,
-                                item.selectedVariantId,
                               )
                             }
                           >
@@ -116,9 +149,8 @@ export function CartDrawer() {
                             className="h-8 w-8"
                             onClick={() =>
                               updateQuantity(
-                                item.id,
+                                item.cartItemId,
                                 item.quantity + 1,
-                                item.selectedVariantId,
                               )
                             }
                           >

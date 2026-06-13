@@ -106,6 +106,25 @@ export default function CheckoutPage() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
+      // Formatear personalizaciones para las notas generales del CRM (fallback)
+      let notesWithCustomizations = formData.notes
+      const customItemsInfo = items
+        .filter(item => item.customizationNote || (item.customizationImages && item.customizationImages.length > 0))
+        .map(item => {
+          let itemDetails = `- ${item.name}:`
+          if (item.customizationNote) {
+            itemDetails += `\n  * Nota: ${item.customizationNote}`
+          }
+          if (item.customizationImages && item.customizationImages.length > 0) {
+            itemDetails += `\n  * Imágenes:\n    ${item.customizationImages.map(img => `- ${img}`).join('\n    ')}`
+          }
+          return itemDetails
+        })
+
+      if (customItemsInfo.length > 0) {
+        notesWithCustomizations += `${notesWithCustomizations ? '\n\n' : ''}=== PERSONALIZACIONES ===\n${customItemsInfo.join('\n')}`
+      }
+
       const crmOrderData = {
         cart: items.map((item) => ({
           product: { 
@@ -115,6 +134,8 @@ export default function CheckoutPage() {
           },
           qty: item.quantity,
           productVariantId: item.selectedVariantId,
+          description: item.customizationNote || null,
+          customImages: item.customizationImages || null,
         })),
         customerData: {
           name: formData.name.split(' ')[0] || "Cliente",
@@ -123,7 +144,7 @@ export default function CheckoutPage() {
           phone: formData.phone,
           address: `${formData.address}, ${formData.city} (${formData.postalCode})`,
           paymentMethod: formData.payment,
-          notes: formData.notes,
+          notes: notesWithCustomizations,
           deliveryType: formData.shipping === 'pickup' ? 'pickup' : 'delivery',
         },
         deliveryCost: shippingCost,
@@ -378,14 +399,50 @@ export default function CheckoutPage() {
                 
                 <div className="space-y-4 mb-6">
                   {items.map((item) => (
-                    <div key={`${item.id}-${item.selectedVariantId || 'default'}`} className="flex gap-4">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-md bg-secondary shrink-0">
-                        <Package className="h-6 w-6 text-muted-foreground/50" />
+                    <div key={item.cartItemId} className="flex gap-4 items-start">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-md bg-secondary shrink-0 overflow-hidden">
+                        {item.image ? (
+                          <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <Package className="h-6 w-6 text-muted-foreground/50" />
+                        )}
                       </div>
                       <div className="flex flex-1 flex-col">
                         <p className="font-medium text-foreground text-sm leading-tight">{item.name}</p>
-                        <p className="text-xs text-muted-foreground">Cant: {item.quantity}</p>
-                        <p className="font-semibold text-foreground text-sm mt-auto">
+                        {item.variantName && (
+                          <span className="text-[9px] bg-secondary px-1 py-0.5 rounded text-secondary-foreground font-medium uppercase inline-block mt-0.5 w-fit">
+                            {item.variantName}
+                          </span>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-0.5">Cant: {item.quantity}</p>
+                        
+                        {/* Customization Details in Summary */}
+                        {(item.customizationNote || (item.customizationImages && item.customizationImages.length > 0)) && (
+                          <div className="mt-1.5 p-2 bg-secondary/50 rounded border border-border/40 space-y-1 text-[10px] w-full">
+                            {item.customizationNote && (
+                              <p className="italic text-foreground leading-tight">
+                                "{item.customizationNote}"
+                              </p>
+                            )}
+                            {item.customizationImages && item.customizationImages.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-0.5">
+                                {item.customizationImages.map((imgUrl, idx) => (
+                                  <a
+                                    key={idx}
+                                    href={imgUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="block border border-border/60 rounded overflow-hidden hover:scale-105 transition-all"
+                                  >
+                                    <img src={imgUrl} alt="custom design" className="w-6 h-6 object-cover" />
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        <p className="font-semibold text-foreground text-sm mt-1">
                           {formatPrice(item.price * item.quantity)}
                         </p>
                       </div>

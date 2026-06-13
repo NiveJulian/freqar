@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/cart-context";
 
@@ -12,8 +12,6 @@ import Image from "next/image";
 
 const navigation = [
   { name: "Productos", href: "/#productos" },
-  { name: "Personalizar", href: "/#personalizador", badge: "Mayorista" },
-  { name: "Nosotros", href: "/#nosotros" },
   { name: "Contacto", href: "/#contacto" },
   // { name: "Links", href: "/links" },
 ];
@@ -130,6 +128,7 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full bg-background">
+              <SheetTitle className="sr-only">Menú de Navegación</SheetTitle>
               <div className="flex flex-col gap-6 pt-8">
                 {navigation.map((item) => (
                   <Link

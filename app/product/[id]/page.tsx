@@ -9,17 +9,22 @@ import {
   Check, 
   Loader2, 
   ChevronRight, 
+  ChevronLeft,
   Star, 
   ShieldCheck, 
   Truck, 
-  RefreshCw 
+  RefreshCw,
+  Upload,
+  Trash2,
+  AlertCircle,
+  X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { useCart } from "@/lib/cart-context"
-import { fetchProductById } from "@/lib/api-service"
+import { fetchProductById, uploadFile } from "@/lib/api-service"
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('es-AR', {
@@ -39,6 +44,41 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [justAdded, setJustAdded] = useState(false)
+  
+  // Customization States
+  const [customizationNote, setCustomizationNote] = useState("")
+  const [customizationImages, setCustomizationImages] = useState<string[]>([])
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return
+    setIsUploading(true)
+    setUploadError(null)
+
+    const filesArray = Array.from(e.target.files)
+    const urls: string[] = []
+
+    for (const file of filesArray) {
+      try {
+        const data = await uploadFile(file)
+        if (data && data.url) {
+          urls.push(data.url)
+        }
+      } catch (err: any) {
+        console.error("Error al subir imagen:", err)
+        setUploadError("Error al subir uno o más archivos. Por favor, intenta de nuevo.")
+      }
+    }
+
+    setCustomizationImages((prev) => [...prev, ...urls])
+    setIsUploading(false)
+  }
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setCustomizationImages((prev) => prev.filter((_, idx) => idx !== indexToRemove))
+  }
 
   useEffect(() => {
     if (!id) return
@@ -91,9 +131,13 @@ export default function ProductDetailPage() {
       originalPrice: product.purchasePrice > product.price ? product.purchasePrice : null,
       stock: (product.stock || 0) > 0,
       badge: product.outstanding ? "Destacado" : null,
-      image: product.images?.[0]?.url || "/products/placeholder.jpg"
+      image: product.images?.[0]?.url || "/products/placeholder.jpg",
+      customizationNote: customizationNote.trim() || undefined,
+      customizationImages: customizationImages.length > 0 ? customizationImages : undefined,
     })
     setJustAdded(true)
+    setCustomizationNote("")
+    setCustomizationImages([])
     setTimeout(() => setJustAdded(false), 2000)
   }
 
@@ -122,12 +166,20 @@ export default function ProductDetailPage() {
         <div className="grid gap-12 lg:grid-cols-2">
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="aspect-square overflow-hidden rounded-2xl bg-secondary flex items-center justify-center">
+            <div 
+              className="aspect-square overflow-hidden rounded-2xl bg-secondary flex items-center justify-center cursor-zoom-in group relative border border-border"
+              onClick={() => setIsPreviewOpen(true)}
+            >
               <img 
                 src={images[selectedImage]} 
                 alt={product.name}
-                className="h-full w-full object-cover transition-all"
+                className="h-full w-full object-cover transition-all duration-300 group-hover:scale-[1.01]"
               />
+              <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="bg-black/60 text-white text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm pointer-events-none">
+                  Ampliar imagen
+                </span>
+              </div>
             </div>
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-4">
@@ -219,6 +271,86 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
 
+                {/* Personalización de Grabado */}
+                <div className="rounded-xl border border-border bg-card/50 p-6 space-y-4 mt-6">
+                  <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+                    Personalización del Grabado
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-normal">
+                    Indicá aquí el nombre, frase o detalles de diseño que te gustaría grabar. También podés subir tus propios logos o imágenes en formato vectorial o imagen (.png, .jpg, .svg).
+                  </p>
+                  
+                  {/* TextArea */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="custom-note" className="text-xs font-medium text-foreground">
+                      Instrucciones de grabado (Texto / logos)
+                    </label>
+                    <textarea
+                      id="custom-note"
+                      rows={3}
+                      className="w-full rounded-lg border border-border bg-background/50 px-3 py-2 text-sm text-foreground focus:border-foreground/45 focus:outline-none transition-all placeholder:text-muted-foreground/60 resize-none"
+                      placeholder="Ej: Grabar el nombre 'Martín' en cursiva y el logo de la empresa centrado del lado de atrás."
+                      value={customizationNote}
+                      onChange={(e) => setCustomizationNote(e.target.value)}
+                    />
+                  </div>
+
+                  {/* File Upload Button */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-medium text-foreground block">
+                      Subir archivo(s) de diseño
+                    </span>
+                    
+                    <div className="flex items-center gap-3">
+                      <label className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border bg-background hover:bg-secondary/50 text-xs font-semibold text-foreground cursor-pointer transition-colors shadow-sm animate-in fade-in">
+                        <Upload className="h-4 w-4 text-muted-foreground" />
+                        Seleccionar imágenes
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                          disabled={isUploading}
+                        />
+                      </label>
+                      
+                      {isUploading && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                          Subiendo archivos...
+                        </span>
+                      )}
+                    </div>
+
+                    {uploadError && (
+                      <div className="flex items-center gap-1.5 text-xs text-red-500 bg-red-500/5 border border-red-500/10 p-2.5 rounded-lg">
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        <span>{uploadError}</span>
+                      </div>
+                    )}
+
+                    {/* Previews Grid */}
+                    {customizationImages.length > 0 && (
+                      <div className="grid grid-cols-4 gap-3 pt-2">
+                        {customizationImages.map((imgUrl, idx) => (
+                          <div key={idx} className="group relative aspect-square rounded-lg border border-border overflow-hidden bg-secondary">
+                            <img src={imgUrl} alt="uploaded design" className="h-full w-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(idx)}
+                              className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-600 transition-colors cursor-pointer"
+                              title="Eliminar imagen"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="flex flex-col gap-4 sm:flex-row pt-4">
                   <div className="flex items-center rounded-lg border border-border px-2">
                     <button 
@@ -274,6 +406,79 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </main>
+      {/* Image Preview Modal */}
+      {isPreviewOpen && (
+        <div 
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-4 cursor-zoom-out animate-in fade-in duration-300"
+          onClick={() => setIsPreviewOpen(false)}
+        >
+          <button
+            onClick={() => setIsPreviewOpen(false)}
+            className="absolute top-6 right-6 z-50 rounded-full bg-black/40 p-3 text-white hover:bg-white hover:text-black transition-all cursor-pointer shadow-md"
+            title="Cerrar vista"
+          >
+            <X className="h-6 w-6" />
+          </button>
+          
+          <div className="relative max-w-5xl max-h-[80vh] w-full h-full flex items-center justify-center">
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+                  }}
+                  className="absolute left-2 lg:left-6 z-50 rounded-full bg-black/40 p-3 text-white hover:bg-white hover:text-black transition-all cursor-pointer shadow-md"
+                  title="Anterior"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+                  }}
+                  className="absolute right-2 lg:right-6 z-50 rounded-full bg-black/40 p-3 text-white hover:bg-white hover:text-black transition-all cursor-pointer shadow-md"
+                  title="Siguiente"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              </>
+            )}
+            
+            <div 
+              className="relative w-full h-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={images[selectedImage]} 
+                alt={product.name}
+                className="max-w-full max-h-full object-contain rounded-xl shadow-2xl select-none animate-in zoom-in-95 duration-200"
+              />
+            </div>
+          </div>
+
+          {images.length > 1 && (
+            <div 
+              className="flex justify-center gap-2 mt-6 max-w-full overflow-x-auto py-2 px-4 bg-black/30 rounded-full backdrop-blur-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {images.map((img: string, idx: number) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedImage(idx)}
+                  className={cn(
+                    "w-12 h-12 rounded-md overflow-hidden border-2 transition-all",
+                    selectedImage === idx ? "border-white scale-105" : "border-transparent opacity-50 hover:opacity-100"
+                  )}
+                >
+                  <img src={img} alt={`Slide ${idx}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

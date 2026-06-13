@@ -17,17 +17,21 @@ export interface Product {
   variants?: any[]
   selectedVariantId?: string
   variantName?: string
+  // Customization
+  customizationNote?: string
+  customizationImages?: string[]
 }
 
 export interface CartItem extends Product {
+  cartItemId: string
   quantity: number
 }
 
 interface CartContextType {
   items: CartItem[]
   addItem: (product: Product) => void
-  removeItem: (productId: string, variantId?: string) => void
-  updateQuantity: (productId: string, quantity: number, variantId?: string) => void
+  removeItem: (cartItemId: string) => void
+  updateQuantity: (cartItemId: string, quantity: number) => void
   clearCart: () => void
   totalItems: number
   totalPrice: number
@@ -44,34 +48,39 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = useCallback((product: Product) => {
     setItems((current) => {
       const existingItem = current.find(
-        (item) => item.id === product.id && item.selectedVariantId === product.selectedVariantId
+        (item) => 
+          item.id === product.id && 
+          item.selectedVariantId === product.selectedVariantId &&
+          item.customizationNote === product.customizationNote &&
+          JSON.stringify(item.customizationImages) === JSON.stringify(product.customizationImages)
       )
       if (existingItem) {
         return current.map((item) =>
-          item.id === product.id && item.selectedVariantId === product.selectedVariantId
+          item.cartItemId === existingItem.cartItemId
             ? { ...item, quantity: item.quantity + 1 }
             : item
         )
       }
-      return [...current, { ...product, quantity: 1 }]
+      const cartItemId = `${product.id}-${product.selectedVariantId || "default"}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      return [...current, { ...product, cartItemId, quantity: 1 }]
     })
     setIsOpen(true)
   }, [])
 
-  const removeItem = useCallback((productId: string, variantId?: string) => {
+  const removeItem = useCallback((cartItemId: string) => {
     setItems((current) => 
-      current.filter((item) => !(item.id === productId && item.selectedVariantId === variantId))
+      current.filter((item) => item.cartItemId !== cartItemId)
     )
   }, [])
 
-  const updateQuantity = useCallback((productId: string, quantity: number, variantId?: string) => {
+  const updateQuantity = useCallback((cartItemId: string, quantity: number) => {
     if (quantity < 1) {
-      removeItem(productId, variantId)
+      removeItem(cartItemId)
       return
     }
     setItems((current) =>
       current.map((item) =>
-        item.id === productId && item.selectedVariantId === variantId ? { ...item, quantity } : item
+        item.cartItemId === cartItemId ? { ...item, quantity } : item
       )
     )
   }, [removeItem])

@@ -301,7 +301,7 @@ export function Products() {
         <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="mb-2 text-xs uppercase tracking-[0.3em] text-muted-foreground font-semibold">
-              E-Commerce Meraki
+              E-Commerce FREQ.AR
             </p>
             <h2 className="text-4xl font-extrabold tracking-tight text-foreground lg:text-5xl text-balance">
               Nuestra Colección
@@ -400,7 +400,7 @@ export function Products() {
                           setCurrentPage(1)
                         }}
                       >
-                        Hasta ${val.toLocaleString()}
+                        Hasta ${val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
                       </Badge>
                     ))}
                   </div>

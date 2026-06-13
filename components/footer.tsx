@@ -21,8 +21,8 @@ const navigation = {
     { name: "Catálogo PDF", href: "#" },
   ],
   legal: [
-    { name: "Términos y condiciones", href: "#" },
-    { name: "Política de privacidad", href: "#" },
+    { name: "Términos y condiciones", href: "/legales#terminos" },
+    { name: "Política de privacidad", href: "/legales#privacidad" },
   ],
 };
 
