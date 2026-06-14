@@ -15,7 +15,6 @@ const navigation = {
     { name: "Madera", href: "#" },
   ],
   empresa: [
-    { name: "Nosotros", href: "nosotros" },
     { name: "Mayorista", href: "mayorista" },
     { name: "Contacto", href: "contacto" },
     { name: "Catálogo PDF", href: "#" },
