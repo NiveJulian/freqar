@@ -3,17 +3,17 @@ export interface PetOwner {
   ownerName: string;
   petName: string;
   petBreed?: string;
-  petType: 'dog' | 'cat' | 'other';
+  petType: "dog" | "cat" | "other";
   phone: string; // Formato: 5491133334444 (solo números, con código de país)
   message: string; // Mensaje por defecto para enviar por WhatsApp
   avatarUrl?: string; // URL opcional de la foto de la mascota o dueño
-  status?: 'active' | 'lost' | 'found';
+  status?: "active" | "lost" | "found";
 }
 
 /**
  * CONFIGURACIÓN DE DUEÑOS DE MASCOTAS
  * Puedes agregar, editar o quitar dueños de mascotas editando este arreglo.
- * 
+ *
  * Importante para el campo 'phone':
  * - Debe contener únicamente números.
  * - Incluir código de país y código de área (ej: 54911... para Buenos Aires, Argentina).
@@ -27,7 +27,8 @@ export const petOwners: PetOwner[] = [
     petBreed: "Salchicha",
     petType: "dog",
     phone: "5493772530875",
-    message: "¡Hola Camila! Encontré a tu perrito Beto. Por favor, comunícate conmigo para coordinar la entrega.",
+    message:
+      "¡Hola Camila! Encontré a tu perrito Beto. Por favor, comunícate conmigo para coordinar la entrega.",
     avatarUrl: "",
     status: "active",
   },
@@ -38,7 +39,8 @@ export const petOwners: PetOwner[] = [
     petBreed: "Salchicha",
     petType: "dog",
     phone: "5493772583027",
-    message: "¡Hola Santi! Encontré a tu perrito Toto. Escríbeme cuando puedas para que coordinemos.",
+    message:
+      "¡Hola Santi! Encontré a tu perrito Toto. Escríbeme cuando puedas para que coordinemos.",
     avatarUrl: "",
     status: "active",
   },
@@ -49,10 +51,23 @@ export const petOwners: PetOwner[] = [
     petBreed: "Gato",
     petType: "cat",
     phone: "5493772430927",
-    message: "¡Hola Agustina! Encontré a tu gatita Luna. Escríbeme para coordinar la devolución.",
+    message:
+      "¡Hola Agustina! Encontré a tu gatita Luna. Escríbeme para coordinar la devolución.",
     avatarUrl: "",
     status: "active",
-  }
+  },
+  {
+    id: "4",
+    ownerName: "Camila Altamirano",
+    petName: "Kai",
+    petBreed: "Perro",
+    petType: "dog",
+    phone: "3772534012",
+    message:
+      "¡Hola! Soy Kai 🐾 Si me encontraste, por favor contactá a mi familia: Camila Altamirano - 📞 3772 534012. Vivo en Rivadavia 855, Paso de los Libres. ¡Gracias por ayudarme a volver a casa!",
+    avatarUrl: "",
+    status: "active",
+  },
 ];
 
 /**
