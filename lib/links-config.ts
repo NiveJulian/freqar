@@ -68,6 +68,18 @@ export const petOwners: PetOwner[] = [
     avatarUrl: "",
     status: "active",
   },
+  {
+    id: "5",
+    ownerName: "Daiana Verón",
+    petName: "Frida",
+    petBreed: "Perro",
+    petType: "dog",
+    phone: "3756500334",
+    message:
+      "¡Hola! Soy Frida 🐾 🌼Si me encontraste, por favor contactá a mi familia. Vivo en Bartolomé Mitre 220, Paso de los Libres. ¡Gracias por ayudarme a volver a casa!",
+    avatarUrl: "",
+    status: "active",
+  }
 ];
 
 /**
