@@ -79,6 +79,30 @@ export const petOwners: PetOwner[] = [
       "¡Hola! Soy Frida 🐾 🌼Si me encontraste, por favor contactá a mi familia. Vivo en Bartolomé Mitre 220, Paso de los Libres. ¡Gracias por ayudarme a volver a casa!",
     avatarUrl: "",
     status: "active",
+  },
+  {
+    id: "6",
+    ownerName: "Tania",
+    petName: "Otto",
+    petBreed: "Perro",
+    petType: "dog",
+    phone: "3772574109",
+    message:
+      "Hola Tania, encontré a Otto escribime y coordinamos para que lo busques",
+    avatarUrl: "",
+    status: "active",
+  },
+  {
+    id: "7",
+    ownerName: "Tania",
+    petName: "Cloy",
+    petBreed: "Perro",
+    petType: "dog",
+    phone: "3772574109",
+    message:
+      "Hola Tania, encontré a Cloy escribime y coordinamos para que lo busques",
+    avatarUrl: "",
+    status: "active",
   }
 ];
 
