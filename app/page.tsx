@@ -1,5 +1,5 @@
 import { Header } from "@/components/header";
-import { Hero } from "@/components/hero";
+import { TermoArgentinaPromo } from "@/components/termo-argentina-promo";
 import { Products } from "@/components/products";
 import { Customizer } from "@/components/customizer";
 import { About } from "@/components/about";
@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-background">
       <Header />
-      <Hero />
+      <TermoArgentinaPromo />
       <Products />
       {/* <Customizer /> */}
       {/* <About /> */}
