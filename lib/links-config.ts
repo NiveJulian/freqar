@@ -103,6 +103,18 @@ export const petOwners: PetOwner[] = [
       "Hola Tania, encontré a Cloy escribime y coordinamos para que lo busques",
     avatarUrl: "",
     status: "active",
+  },
+  {
+    id: "8",
+    ownerName: "Augusto",
+    petName: "AKIA",
+    petBreed: "Perro",
+    petType: "dog",
+    phone: "3772633650",
+    message:
+      "Hola Augusto, encontré a AKIA escribime y coordinamos para que lo busques",
+    avatarUrl: "",
+    status: "active",
   }
 ];
 
