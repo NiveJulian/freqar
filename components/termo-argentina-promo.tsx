@@ -212,6 +212,7 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
     },
   ]
 
+  const WHATSAPP_PHONE = "5493772625862"
   const whatsappMessage = encodeURIComponent(
     "¡Hola! Quiero aprovechar la oferta especial del Termo de Acero Inoxidable Grabado Argentina 3 Estrellas por $48.900 (quedan 5 unidades)."
   )
@@ -445,7 +446,7 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
                         asChild
                       >
                         <a
-                          href={`https://wa.me/?text=${whatsappMessage}`}
+                          href={`https://wa.me/${WHATSAPP_PHONE}?text=${whatsappMessage}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

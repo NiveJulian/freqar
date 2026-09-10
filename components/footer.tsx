@@ -31,7 +31,7 @@ const social = [
     icon: Instagram,
     href: "https://www.instagram.com/freq.ar",
   },
-  { name: "Whatsapp", icon: MessageCirclePlus, href: "#" },
+  { name: "Whatsapp", icon: MessageCirclePlus, href: "https://wa.me/5493772625862" },
   { name: "Email", icon: Mail, href: "mailto:ventas@freq.ar" },
 ];
 

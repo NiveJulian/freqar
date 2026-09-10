@@ -56,8 +56,8 @@ export function Contact() {
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">WhatsApp</div>
-                  <a href="https://wa.me/5491100000000" className="text-foreground hover:underline">
-                    +54 9 11 0000-0000
+                  <a href="https://wa.me/5493772625862" target="_blank" rel="noopener noreferrer" className="text-foreground hover:underline">
+                    +54 9 3772 62-5862
                   </a>
                 </div>
               </div>
