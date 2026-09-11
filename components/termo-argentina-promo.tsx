@@ -17,6 +17,8 @@ import {
   ThermometerSun,
   Layers,
   ArrowRight,
+  Gem,
+  Gift,
 } from "lucide-react"
 import {
   Carousel,
@@ -30,8 +32,7 @@ import { useCart, type Product } from "@/lib/cart-context"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
-// Imágenes por defecto. Podés cambiarlas aquí o pasar la prop `images` desde la página.
-// Las fotos que aportes podés colocarlas en `public/images/termo-argentina/`
+// Imágenes por defecto. Podés cambiarlas aquí o pasar la prop `images`
 export const DEFAULT_TERMO_IMAGES = {
   main: "/images/termo-argentina/termo-argentina-main.jpeg",
   detail: "/images/termo-argentina/termo-argentina-detail.jpg",
@@ -49,6 +50,7 @@ export interface TermoArgentinaPromoProps {
 const TOTAL_STOCK = 15
 const REMAINING_UNIDADES = 5
 const SOLD_UNIDADES = TOTAL_STOCK - REMAINING_UNIDADES
+const WHATSAPP_PHONE = "5493772625862"
 
 interface TimeLeft {
   days: number
@@ -165,24 +167,24 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
     return () => clearInterval(interval)
   }, [api, isHovered])
 
-  // Producto que se agrega al carrito
+  // Ficha de producto para el carrito
   const termoProduct: Product = {
-    id: "termo-acero-argentina-3-estrellas",
-    name: "Termo de Acero Inoxidable Grabado Láser • Edición Argentina 3 Estrellas (1.2L)",
+    id: "termo-argentina-grabado-integral",
+    name: "Termo Argentina Negro Mate – Grabado Láser Integral",
     category: "termos",
     description:
-      "Termo 100% de acero inoxidable 304 bicapa al vacío (1.2L). Grabado láser de fibra óptica indeleble con escudo de Argentina, 3 estrellas y Sol de Mayo. Conserva 24hs calor y 36hs frío. Incluye pico cebador matero 360°.",
+      "Termo de acero inoxidable negro mate con grabado láser integral inspirado en Argentina. Un diseño trabajado en todo el cuerpo del termo, combinando identidad nacional, ornamentación y detalles que resaltan sobre el acabado negro.",
     price: 48900,
     originalPrice: 68000,
     stock: true,
-    badge: "Oferta Flash",
+    badge: "Grabado Integral",
     image: imgMain,
   }
 
   const handleAddToCart = () => {
     setIsAdding(true)
     addItem(termoProduct)
-    toast.success("¡Termo de Acero Argentina añadido al carrito!", {
+    toast.success("¡Termo Argentina – Grabado Integral añadido al carrito!", {
       description: "Quedan solo 5 unidades al precio promocional de lanzamiento.",
     })
     setTimeout(() => setIsAdding(false), 800)
@@ -195,26 +197,28 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
 
   const slidesData = [
     {
-      title: "Oferta y Stock",
-      badge: "Lanzamiento Exclusivo",
+      title: "Grabado Integral",
+      badge: "Edición Limitada",
     },
     {
-      title: "Grabado en Acero",
-      badge: "Fibra Óptica Indeleble",
+      title: "Cuerpo Completo",
+      badge: "Láser 360°",
     },
     {
       title: "Rendimiento Térmico",
-      badge: "Bicapa 24hs Calor",
+      badge: "Acero 304 • 24hs",
     },
     {
-      title: "Combo y Garantía",
-      badge: "Packaging FREQ",
+      title: "Combo & Garantía",
+      badge: "Listo para Regalo",
     },
   ]
 
-  const WHATSAPP_PHONE = "5493772625862"
+  // Mensaje para WhatsApp con el texto comercial exacto
   const whatsappMessage = encodeURIComponent(
-    "¡Hola! Quiero aprovechar la oferta especial del Termo de Acero Inoxidable Grabado Argentina 3 Estrellas por $48.900 (quedan 5 unidades)."
+    "🇦🇷 ¡Hola! Me interesa el Termo Argentina – Grabado Integral (Negro Mate).\n" +
+    "Termo negro mate con grabado láser de cuerpo completo. Diseño argentino, elegante y llamativo.\n" +
+    "Quería consultar disponibilidad y aprovechar la oferta de $48.900 (últimas 5 unidades)."
   )
 
   return (
@@ -244,7 +248,7 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
               <div>
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                   <Badge className="bg-sky-500 hover:bg-sky-600 text-white font-bold tracking-wide uppercase text-xs">
-                    Edición Especial Argentina 🇦🇷
+                    🇦🇷 Llevá Argentina con vos
                   </Badge>
                   <Badge
                     variant="outline"
@@ -252,10 +256,19 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
                   >
                     ⚡ Oferta Relámpago (3 Días)
                   </Badge>
+                  <Badge
+                    variant="secondary"
+                    className="bg-neutral-800 text-neutral-200 border-neutral-700 text-xs font-semibold"
+                  >
+                    🖤 Negro Mate
+                  </Badge>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground mt-1">
-                  Nuevo Termo de Acero Inoxidable Grabado Láser • 3 Estrellas
+                  Termo Argentina – Grabado Integral
                 </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                  Termo negro mate con grabado láser integral, inspirado en nuestra identidad y cultura.
+                </p>
               </div>
             </div>
 
@@ -323,10 +336,48 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
                 />
               </div>
               <p className="text-[11px] text-muted-foreground leading-tight">
-                90% de la tanda reservada. Quedan las últimas 5 piezas.
+                Stock de lanzamiento casi agotado. Quedan 5 unidades disponibles.
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Pestañas de acceso rápido a los 4 slides */}
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+          {slidesData.map((slide, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleScrollToSlide(idx)}
+              className={cn(
+                "group flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+                activeTab === idx
+                  ? "bg-foreground text-background border-foreground shadow-md scale-105"
+                  : "bg-card/70 hover:bg-card text-muted-foreground hover:text-foreground border-border"
+              )}
+            >
+              <span
+                className={cn(
+                  "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold",
+                  activeTab === idx
+                    ? "bg-background text-foreground"
+                    : "bg-muted text-muted-foreground group-hover:text-foreground"
+                )}
+              >
+                {idx + 1}
+              </span>
+              <span>{slide.title}</span>
+              <span
+                className={cn(
+                  "hidden md:inline-block text-[11px] font-normal px-2 py-0.5 rounded-md",
+                  activeTab === idx
+                    ? "bg-background/20 text-background font-medium"
+                    : "bg-secondary text-muted-foreground"
+                )}
+              >
+                {slide.badge}
+              </span>
+            </button>
+          ))}
         </div>
 
         {/* Contenedor del Carrusel */}
@@ -340,14 +391,14 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
             className="w-full"
           >
             <CarouselContent>
-              {/* SLIDE 1: Presentación & Oferta de Lanzamiento */}
+              {/* SLIDE 1: Título de Tienda Online & Oferta */}
               <CarouselItem>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-6 sm:p-10 lg:p-12">
                   <div className="lg:col-span-6 relative flex items-center justify-center">
                     <div className="relative aspect-square w-full max-w-[460px] overflow-hidden rounded-2xl border border-border/80 bg-neutral-950 shadow-2xl group">
                       <img
                         src={imgMain}
-                        alt="Termo de acero inoxidable con grabado láser de Argentina 3 Estrellas"
+                        alt="Termo Argentina Negro Mate – Grabado Láser Integral"
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
 
@@ -355,7 +406,7 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
 
                       <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                         <Badge className="bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold py-1 px-3 shadow-lg">
-                          ⭐ Edición Campeones 3 Estrellas
+                          ⚡ Grabado Láser Integral
                         </Badge>
                         <Badge className="bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold py-1 px-3 shadow-lg flex items-center gap-1">
                           <Flame className="h-3.5 w-3.5" /> 28% OFF Lanzamiento
@@ -366,7 +417,7 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
                         <div className="flex items-center gap-2">
                           <div className="h-2.5 w-2.5 rounded-full bg-red-500 animate-ping" />
                           <span className="text-xs font-bold uppercase tracking-wider text-red-300">
-                            ¡Solo {REMAINING_UNIDADES} unidades a precio de oferta!
+                            ¡Solo {REMAINING_UNIDADES} unidades disponibles!
                           </span>
                         </div>
                         <span className="text-xs text-neutral-300 font-mono">
@@ -376,7 +427,7 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
                     </div>
                   </div>
 
-                  <div className="lg:col-span-6 flex flex-col justify-center space-y-6">
+                  <div className="lg:col-span-6 flex flex-col justify-center space-y-5">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex text-amber-400">
@@ -385,24 +436,48 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
                           ))}
                         </div>
                         <span className="text-xs font-semibold text-muted-foreground">
-                          4.9/5 (Más de 320 termos grabados enviados)
+                          4.9/5 • Calidad Premium Garantizada
                         </span>
                       </div>
 
                       <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight leading-tight">
-                        Termo de Acero Inoxidable{" "}
-                        <span className="text-sky-400">Grabado Argentina 3 Estrellas</span>
+                        Termo Argentina Negro Mate{" "}
+                        <span className="text-sky-400">– Grabado Láser Integral</span>
                       </h3>
 
                       <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                        Cuerpo íntegro de <strong>acero inoxidable 304</strong> bicapa con cámara de vacío.
-                        El grabado láser de fibra óptica de alta definición se realiza directamente sobre el acero,
-                        garantizando máxima durabilidad sin desgastes, no se borra ni se salta con los lavados.
+                        Termo de acero inoxidable negro mate con grabado láser integral inspirado en Argentina.
+                        Un diseño trabajado en todo el cuerpo del termo, combinando identidad nacional, ornamentación
+                        y detalles que resaltan con máxima elegancia sobre el acabado negro.
                       </p>
                     </div>
 
+                    {/* Características clave en pills */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      <div className="flex items-center gap-1.5 rounded-lg bg-secondary/60 px-3 py-2 text-xs font-medium text-foreground border border-border/50">
+                        <span>🇦🇷</span>
+                        <span>Diseño argentino</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 rounded-lg bg-secondary/60 px-3 py-2 text-xs font-medium text-foreground border border-border/50">
+                        <span>🔥</span>
+                        <span>Grabado integral</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 rounded-lg bg-secondary/60 px-3 py-2 text-xs font-medium text-foreground border border-border/50">
+                        <span>🖤</span>
+                        <span>Negro mate</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 rounded-lg bg-secondary/60 px-3 py-2 text-xs font-medium text-foreground border border-border/50">
+                        <span>💎</span>
+                        <span>Alta presencia visual</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 rounded-lg bg-secondary/60 px-3 py-2 text-xs font-medium text-foreground border border-border/50 sm:col-span-2">
+                        <span>🎁</span>
+                        <span>Ideal para regalo o uso diario</span>
+                      </div>
+                    </div>
+
                     {/* Precios y Cuotas */}
-                    <div className="rounded-2xl border border-border bg-secondary/50 p-5 space-y-3">
+                    <div className="rounded-2xl border border-border bg-secondary/40 p-4 space-y-2.5">
                       <div className="flex items-baseline gap-3">
                         <span className="text-3xl sm:text-4xl font-black text-foreground font-mono">
                           $48.900
@@ -416,19 +491,19 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        <div className="flex items-center gap-2 text-foreground font-medium bg-background/60 p-2.5 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-2 text-foreground font-medium bg-background/60 p-2 rounded-lg border border-border/50">
                           <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
                           <span>3 Cuotas sin interés de <strong>$16.300</strong></span>
                         </div>
-                        <div className="flex items-center gap-2 text-foreground font-medium bg-background/60 p-2.5 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-2 text-foreground font-medium bg-background/60 p-2 rounded-lg border border-border/50">
                           <CheckCircle2 className="h-4 w-4 text-amber-400 shrink-0" />
                           <span>15% OFF por Transferencia (<strong>$41.565</strong>)</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Botones de acción */}
-                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    {/* Botones de acción directa */}
+                    <div className="flex flex-col sm:flex-row gap-3 pt-1">
                       <Button
                         size="lg"
                         className="flex-1 text-base font-bold gap-2.5 h-13 shadow-xl hover:scale-[1.02] transition-transform bg-primary text-primary-foreground"
@@ -451,7 +526,7 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
                           rel="noopener noreferrer"
                         >
                           <MessageCircle className="h-5 w-5 text-green-500" />
-                          Consultar WhatsApp
+                          Pedir por WhatsApp
                         </a>
                       </Button>
                     </div>
@@ -476,6 +551,104 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
                           Grabado Indeleble
                         </span>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </CarouselItem>
+
+              {/* SLIDE 2: ARGENTINA, grabada en cada detalle (Grabado Integral) */}
+              <CarouselItem>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-6 sm:p-10 lg:p-12">
+                  <div className="lg:col-span-6 relative flex items-center justify-center">
+                    <div className="relative aspect-square w-full max-w-[460px] overflow-hidden rounded-2xl border border-border/80 bg-neutral-950 shadow-2xl group">
+                      <img
+                        src={imgDetail}
+                        alt="Detalle del grabado láser integral en termo negro mate"
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+                      <div className="absolute top-4 left-4 z-10">
+                        <Badge className="bg-amber-500 text-black text-xs font-bold py-1 px-3 shadow-lg">
+                          ⚡ Grabado Láser de Cuerpo Completo
+                        </Badge>
+                      </div>
+                      <div className="absolute bottom-4 left-4 right-4 z-10 rounded-xl bg-black/80 p-3 text-xs text-neutral-300 backdrop-blur-md border border-white/10">
+                        Un diseño trabajado en todo el cuerpo del termo: no es un simple logo, es un grabado integral de máxima resolución.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-6 flex flex-col justify-center space-y-5">
+                    <Badge variant="outline" className="w-fit border-sky-400/40 text-sky-400">
+                      🇦🇷 Identidad y Cultura Argentina
+                    </Badge>
+
+                    <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">
+                      ARGENTINA, grabada en{" "}
+                      <span className="text-amber-400">cada detalle</span>
+                    </h3>
+
+                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                      Termo negro mate con grabado láser de cuerpo completo, con diseño argentino y terminación premium.
+                      Un termo pensado para quienes llevan la pasión a todas partes y buscan una pieza que realmente no pase desapercibida.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div className="flex items-start gap-3 rounded-xl bg-secondary/40 p-3.5 border border-border/60">
+                        <span className="text-xl">🔥</span>
+                        <div>
+                          <h4 className="text-sm font-bold text-foreground">Diseño exclusivo</h4>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Ornamentación e iconografía nacional trabajada sobre todo el cuerpo del termo.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 rounded-xl bg-secondary/40 p-3.5 border border-border/60">
+                        <span className="text-xl">🖤</span>
+                        <div>
+                          <h4 className="text-sm font-bold text-foreground">Terminación negro mate</h4>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Contraste de alto impacto visual entre el acero plateado del láser y el fondo mate.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 rounded-xl bg-secondary/40 p-3.5 border border-border/60">
+                        <span className="text-xl">⚡</span>
+                        <div>
+                          <h4 className="text-sm font-bold text-foreground">Grabado láser integral</h4>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Indeleble de por vida: no se borra, no se raya y resiste el calor y lavados.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 rounded-xl bg-secondary/40 p-3.5 border border-border/60">
+                        <span className="text-xl">🎁</span>
+                        <div>
+                          <h4 className="text-sm font-bold text-foreground">Para regalar o llevar</h4>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            El regalo perfecto que despierta admiración en cada mateada.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-3">
+                      <Button onClick={handleAddToCart} size="lg" className="gap-2 font-bold flex-1">
+                        <ShoppingCart className="h-4 w-4" />
+                        Quiero Mi Termo Integral ($48.900)
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        onClick={() => handleScrollToSlide(2)}
+                        className="gap-2 text-xs sm:text-sm"
+                      >
+                        Ver Rendimiento
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -572,13 +745,13 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
                     <div className="relative aspect-square w-full max-w-[460px] overflow-hidden rounded-2xl border border-border/80 bg-neutral-950 shadow-2xl group">
                       <img
                         src={imgLifestyle}
-                        alt="Termo de acero inoxidable con mate y bombilla en mesa matera"
+                        alt="Termo Argentina – Grabado Integral en mesa matera"
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
                       <div className="absolute top-4 left-4 z-10">
                         <Badge className="bg-sky-500 text-white text-xs font-bold py-1 px-3 shadow-lg">
-                          🇦🇷 Experiencia Matera Argentina
+                          💎 Un termo que no pasa desapercibido
                         </Badge>
                       </div>
                       <div className="absolute bottom-4 left-4 right-4 z-10 rounded-xl bg-black/80 p-3 text-xs text-neutral-300 backdrop-blur-md border border-white/10">
@@ -604,7 +777,7 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
                           ¿Qué incluye tu compra hoy?
                         </h4>
                         <ul className="text-xs text-muted-foreground space-y-1.5 list-disc list-inside">
-                          <li>1x Termo de <strong>acero inoxidable 304</strong> de 1.2L grabado láser con motivo Selección Argentina.</li>
+                          <li>1x Termo de <strong>acero inoxidable 304</strong> de 1.2L con Grabado Láser Integral motivo Argentina.</li>
                           <li>1x Tapón cebador matero 360° hermético anti-derrame.</li>
                           <li>1x Tapa térmica de acero desmontable multifunción (funciona como vaso).</li>
                           <li>1x Caja packaging rígido FREQ.AR con protección antichoque.</li>
@@ -617,7 +790,7 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
                           <Truck className="h-5 w-5 text-sky-400 shrink-0" />
                           <div>
                             <p className="text-xs font-bold text-foreground">Despacho Inmediato</p>
-                            <p className="text-[11px] text-muted-foreground">Enviamos dentro de las 24hs hábiles a todo el país con código de seguimiento.</p>
+                            <p className="text-[11px] text-muted-foreground">Disponible para entrega inmediata a todo el país con código de seguimiento.</p>
                           </div>
                         </div>
                         <Badge className="bg-sky-500/20 text-sky-300 border-sky-500/40 text-[11px]">
