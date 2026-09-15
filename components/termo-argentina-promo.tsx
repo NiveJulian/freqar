@@ -3,22 +3,11 @@
 import { useState, useEffect } from "react"
 import {
   Clock,
-  Flame,
-  ShieldCheck,
-  Sparkles,
   ShoppingCart,
-  Truck,
-  CheckCircle2,
-  Award,
   ChevronRight,
   ChevronLeft,
-  Star,
   MessageCircle,
-  ThermometerSun,
-  Layers,
-  ArrowRight,
-  Gem,
-  Gift,
+  Sparkles,
 } from "lucide-react"
 import {
   Carousel,
@@ -26,30 +15,36 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useCart, type Product } from "@/lib/cart-context"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
-// Imágenes por defecto. Podés cambiarlas aquí o pasar la prop `images`
-export const DEFAULT_TERMO_IMAGES = {
-  main: "/images/termo-argentina/termo-argentina-main.jpeg",
-  detail: "/images/termo-argentina/termo-argentina-detail.jpg",
-  lifestyle: "/images/termo-argentina/termo-argentina-lifestyle.jpeg",
+export interface TermoImageSlide {
+  src: string
+  alt: string
 }
+
+// Imágenes del carrusel (solo imagen, super sutil)
+export const DEFAULT_TERMO_SLIDES: TermoImageSlide[] = [
+  {
+    src: "/images/termo-argentina/termo-argentina-main.jpeg",
+    alt: "Termo Negro Media Manija – Grabado en láser temática Argentina",
+  },
+  {
+    src: "/images/termo-argentina/termo-argentina-lifestyle.jpeg",
+    alt: "Termo Negro Media Manija – Fotografía en uso matero",
+  },
+  {
+    src: "/images/termo-argentina/termo-argentina-detail.jpg",
+    alt: "Detalle del grabado láser sobre acero inoxidable",
+  },
+]
 
 export interface TermoArgentinaPromoProps {
-  images?: {
-    main?: string
-    detail?: string
-    lifestyle?: string
-  }
+  slides?: TermoImageSlide[]
 }
 
-const TOTAL_STOCK = 15
-const REMAINING_UNIDADES = 5
-const SOLD_UNIDADES = TOTAL_STOCK - REMAINING_UNIDADES
 const WHATSAPP_PHONE = "5493772625862"
 
 interface TimeLeft {
@@ -57,35 +52,27 @@ interface TimeLeft {
   hours: number
   minutes: number
   seconds: number
-  isExpired: boolean
 }
 
-export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
-  const imgMain = images?.main || DEFAULT_TERMO_IMAGES.main
-  const imgDetail = images?.detail || DEFAULT_TERMO_IMAGES.detail
-  const imgLifestyle = images?.lifestyle || DEFAULT_TERMO_IMAGES.lifestyle
-
+export function TermoArgentinaPromo({ slides = DEFAULT_TERMO_SLIDES }: TermoArgentinaPromoProps) {
   const { addItem } = useCart()
   const [api, setApi] = useState<CarouselApi>()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [mounted, setMounted] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const [activeTab, setActiveTab] = useState(0)
   const [isAdding, setIsAdding] = useState(false)
 
-  // Temporizador persistente de 3 días
+  // Temporizador de 3 días de oferta
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     days: 3,
     hours: 0,
     minutes: 0,
     seconds: 0,
-    isExpired: false,
   })
 
-  // Inicializar cuenta regresiva de 3 días con persistencia en localStorage
   useEffect(() => {
     setMounted(true)
-    const STORAGE_KEY = "freqar_termo_acero_argentina_timer_v1"
+    const STORAGE_KEY = "freqar_termo_media_manija_timer_v1"
     const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
 
     let targetTime: number
@@ -103,767 +90,224 @@ export function TermoArgentinaPromo({ images }: TermoArgentinaPromoProps) {
     }
 
     const updateCountdown = () => {
-      const now = Date.now()
-      const diff = targetTime - now
-
+      const diff = targetTime - Date.now()
       if (diff <= 0) {
-        setTimeLeft({
-          days: 0,
-          hours: 0,
-          minutes: 0,
-          seconds: 0,
-          isExpired: true,
-        })
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 })
       } else {
         const days = Math.floor(diff / (1000 * 60 * 60 * 24))
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24)
         const minutes = Math.floor((diff / 1000 / 60) % 60)
         const seconds = Math.floor((diff / 1000) % 60)
-
-        setTimeLeft({
-          days,
-          hours,
-          minutes,
-          seconds,
-          isExpired: false,
-        })
+        setTimeLeft({ days, hours, minutes, seconds })
       }
     }
 
     updateCountdown()
     const timerInterval = setInterval(updateCountdown, 1000)
-
     return () => clearInterval(timerInterval)
   }, [])
 
-  // Sincronizar slide activo del carrusel
+  // Sincronizar slide activo
   useEffect(() => {
     if (!api) return
-
     const onSelect = () => {
-      const selected = api.selectedScrollSnap()
-      setCurrentSlide(selected)
-      setActiveTab(selected)
+      setCurrentSlide(api.selectedScrollSnap())
     }
-
     api.on("select", onSelect)
     return () => {
       api.off("select", onSelect)
     }
   }, [api])
 
-  // Autoplay pausado con el cursor (hover)
+  // Autoplay sutil con pausa al pasar el cursor
   useEffect(() => {
     if (!api || isHovered) return
-
     const interval = setInterval(() => {
       if (api.canScrollNext()) {
         api.scrollNext()
       } else {
         api.scrollTo(0)
       }
-    }, 6000)
-
+    }, 5000)
     return () => clearInterval(interval)
   }, [api, isHovered])
 
-  // Ficha de producto para el carrito
+  // Producto para el carrito
   const termoProduct: Product = {
-    id: "termo-argentina-grabado-integral",
-    name: "Termo Argentina Negro Mate – Grabado Láser Integral",
+    id: "termo-negro-media-manija-argentina",
+    name: "Termo Negro Media Manija – Grabado en láser temática Argentina",
     category: "termos",
     description:
-      "Termo de acero inoxidable negro mate con grabado láser integral inspirado en Argentina. Un diseño trabajado en todo el cuerpo del termo, combinando identidad nacional, ornamentación y detalles que resaltan sobre el acabado negro.",
+      "Termo de acero inoxidable negro mate con media manija. Grabado en láser integral con temática Argentina. Conserva 24hs frío y 24hs calor.",
     price: 48900,
     originalPrice: 68000,
     stock: true,
-    badge: "Grabado Integral",
-    image: imgMain,
+    badge: "Argentina",
+    image: slides[0]?.src || "/images/termo-argentina/termo-argentina-main.jpeg",
   }
 
   const handleAddToCart = () => {
     setIsAdding(true)
     addItem(termoProduct)
-    toast.success("¡Termo Argentina – Grabado Integral añadido al carrito!", {
-      description: "Quedan solo 5 unidades al precio promocional de lanzamiento.",
+    toast.success("Termo añadido al carrito", {
+      description: "Termo Negro Media Manija • Temática Argentina",
     })
-    setTimeout(() => setIsAdding(false), 800)
+    setTimeout(() => setIsAdding(false), 600)
   }
 
-  const handleScrollToSlide = (index: number) => {
-    api?.scrollTo(index)
-    setActiveTab(index)
-  }
-
-  const slidesData = [
-    {
-      title: "Grabado Integral",
-      badge: "Edición Limitada",
-    },
-    {
-      title: "Cuerpo Completo",
-      badge: "Láser 360°",
-    },
-    {
-      title: "Rendimiento Térmico",
-      badge: "Acero 304 • 24hs",
-    },
-    {
-      title: "Combo & Garantía",
-      badge: "Listo para Regalo",
-    },
-  ]
-
-  // Mensaje para WhatsApp con el texto comercial exacto
   const whatsappMessage = encodeURIComponent(
-    "🇦🇷 ¡Hola! Me interesa el Termo Argentina – Grabado Integral (Negro Mate).\n" +
-    "Termo negro mate con grabado láser de cuerpo completo. Diseño argentino, elegante y llamativo.\n" +
-    "Quería consultar disponibilidad y aprovechar la oferta de $48.900 (últimas 5 unidades)."
+    "¡Hola! Me interesa el Termo Negro Media Manija grabado en láser con temática \"Argentina\". ¿Tienen stock disponible?"
   )
 
   return (
     <section
-      id="oferta-termo-argentina"
-      className="relative overflow-hidden py-12 lg:py-20 bg-gradient-to-b from-background via-card/50 to-background border-b border-border"
+      id="termo-media-manija"
+      className="relative py-12 lg:py-16 overflow-hidden bg-background"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Resplandores ambientales celeste y dorado */}
-      <div className="pointer-events-none absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-sky-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-40 right-1/4 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl" />
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
-        {/* Banner superior de urgencia y cuenta regresiva de 3 días */}
-        <div className="mb-8 rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-950/40 via-card/80 to-amber-950/30 p-4 sm:p-6 backdrop-blur-md shadow-2xl shadow-sky-950/20">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-            {/* Título e insignias */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
-              <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 text-white shadow-lg shadow-sky-500/30">
-                <Flame className="h-6 w-6 animate-pulse text-amber-300" />
-                <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-500"></span>
-                </span>
-              </div>
-              <div>
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <Badge className="bg-sky-500 hover:bg-sky-600 text-white font-bold tracking-wide uppercase text-xs">
-                    🇦🇷 Llevá Argentina con vos
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    className="border-amber-500/50 text-amber-300 bg-amber-500/10 text-xs font-semibold"
-                  >
-                    ⚡ Oferta Relámpago (3 Días)
-                  </Badge>
-                  <Badge
-                    variant="secondary"
-                    className="bg-neutral-800 text-neutral-200 border-neutral-700 text-xs font-semibold"
-                  >
-                    🖤 Negro Mate
-                  </Badge>
-                </div>
-                <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground mt-1">
-                  Termo Argentina – Grabado Integral
-                </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                  Termo negro mate con grabado láser integral, inspirado en nuestra identidad y cultura.
-                </p>
-              </div>
-            </div>
-
-            {/* Contador de 3 días en tiempo real */}
-            <div className="flex items-center gap-3 sm:gap-4 bg-background/80 px-4 py-3 rounded-xl border border-border shadow-inner">
-              <div className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground font-semibold pr-2 border-r border-border">
-                <Clock className="h-4 w-4 text-sky-400 animate-spin" style={{ animationDuration: "10s" }} />
-                <span>Termina en:</span>
-              </div>
-
-              <div className="flex items-center gap-2 sm:gap-3 text-center">
-                <div className="flex flex-col">
-                  <span className="text-lg sm:text-2xl font-black font-mono text-foreground leading-none min-w-[28px]">
-                    {mounted ? String(timeLeft.days).padStart(2, "0") : "03"}
-                  </span>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                    Días
-                  </span>
-                </div>
-                <span className="text-muted-foreground font-bold text-lg -mt-3">:</span>
-                <div className="flex flex-col">
-                  <span className="text-lg sm:text-2xl font-black font-mono text-foreground leading-none min-w-[28px]">
-                    {mounted ? String(timeLeft.hours).padStart(2, "0") : "00"}
-                  </span>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                    Horas
-                  </span>
-                </div>
-                <span className="text-muted-foreground font-bold text-lg -mt-3">:</span>
-                <div className="flex flex-col">
-                  <span className="text-lg sm:text-2xl font-black font-mono text-foreground leading-none min-w-[28px]">
-                    {mounted ? String(timeLeft.minutes).padStart(2, "0") : "00"}
-                  </span>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                    Min
-                  </span>
-                </div>
-                <span className="text-muted-foreground font-bold text-lg -mt-3">:</span>
-                <div className="flex flex-col">
-                  <span className="text-lg sm:text-2xl font-black font-mono text-amber-400 leading-none min-w-[28px]">
-                    {mounted ? String(timeLeft.seconds).padStart(2, "0") : "00"}
-                  </span>
-                  <span className="text-[10px] uppercase tracking-wider text-amber-400 font-medium">
-                    Seg
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Escasez: Solo 5 unidades */}
-            <div className="w-full lg:w-64 flex flex-col gap-1.5 bg-background/50 p-3 rounded-xl border border-red-500/20">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-red-400 flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-red-500 animate-ping inline-block" />
-                  ¡Solo {REMAINING_UNIDADES} unidades!
-                </span>
-                <span className="text-muted-foreground font-medium">
-                  {SOLD_UNIDADES}/{TOTAL_STOCK} vendidas
-                </span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-amber-500 to-red-500 transition-all duration-1000"
-                  style={{ width: `${(SOLD_UNIDADES / TOTAL_STOCK) * 100}%` }}
-                />
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-tight">
-                Stock de lanzamiento casi agotado. Quedan 5 unidades disponibles.
-              </p>
-            </div>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
+        {/* Cabecera sutil: Nombre del producto y temática */}
+        <div className="text-center space-y-3 mb-6 sm:mb-8">
+          {/* Pill sutil de oferta de 3 días y stock */}
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-secondary/40 backdrop-blur-sm border border-border/50 text-[11px] sm:text-xs text-muted-foreground">
+            <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+            <span className="flex items-center gap-1 font-medium text-foreground">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+              Oferta especial:{" "}
+              <span className="font-mono text-amber-400">
+                {mounted
+                  ? `${timeLeft.days}d ${String(timeLeft.hours).padStart(2, "0")}h ${String(timeLeft.minutes).padStart(2, "0")}m ${String(timeLeft.seconds).padStart(2, "0")}s`
+                  : "3 días"}
+              </span>
+            </span>
+            <span className="text-border">•</span>
+            <span className="text-muted-foreground font-medium">
+              Solo <strong className="text-foreground">5 unidades</strong>
+            </span>
           </div>
+
+          {/* Nombre principal */}
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
+            Termo Negro Media Manija
+          </h1>
+
+          {/* Subtítulo / Temática */}
+          <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto font-normal">
+            Grabado en láser con temática{" "}
+            <span className="text-foreground font-medium">"Argentina"</span>
+          </p>
         </div>
 
-        {/* Pestañas de acceso rápido a los 4 slides */}
-        <div className="mb-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-          {slidesData.map((slide, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleScrollToSlide(idx)}
-              className={cn(
-                "group flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
-                activeTab === idx
-                  ? "bg-foreground text-background border-foreground shadow-md scale-105"
-                  : "bg-card/70 hover:bg-card text-muted-foreground hover:text-foreground border-border"
-              )}
-            >
-              <span
-                className={cn(
-                  "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold",
-                  activeTab === idx
-                    ? "bg-background text-foreground"
-                    : "bg-muted text-muted-foreground group-hover:text-foreground"
-                )}
-              >
-                {idx + 1}
-              </span>
-              <span>{slide.title}</span>
-              <span
-                className={cn(
-                  "hidden md:inline-block text-[11px] font-normal px-2 py-0.5 rounded-md",
-                  activeTab === idx
-                    ? "bg-background/20 text-background font-medium"
-                    : "bg-secondary text-muted-foreground"
-                )}
-              >
-                {slide.badge}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Contenedor del Carrusel */}
-        <div className="relative rounded-3xl border border-border bg-card shadow-2xl overflow-hidden">
+        {/* Carrusel solo de imagen, super sutil */}
+        <div className="relative mx-auto rounded-2xl sm:rounded-3xl border border-border/60 bg-neutral-950/60 overflow-hidden shadow-2xl backdrop-blur-sm">
           <Carousel
             setApi={setApi}
             opts={{
               loop: true,
-              align: "start",
+              align: "center",
             }}
             className="w-full"
           >
-            <CarouselContent>
-              {/* SLIDE 1: Título de Tienda Online & Oferta */}
-              <CarouselItem>
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-6 sm:p-10 lg:p-12">
-                  <div className="lg:col-span-6 relative flex items-center justify-center">
-                    <div className="relative aspect-square w-full max-w-[460px] overflow-hidden rounded-2xl border border-border/80 bg-neutral-950 shadow-2xl group">
-                      <img
-                        src={imgMain}
-                        alt="Termo Argentina Negro Mate – Grabado Láser Integral"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
+            <CarouselContent className="-ml-0">
+              {slides.map((slide, index) => (
+                <CarouselItem key={index} className="pl-0">
+                  <div className="relative aspect-[4/3] sm:aspect-[16/10] md:aspect-[16/9] w-full overflow-hidden bg-neutral-950 flex items-center justify-center">
+                    <img
+                      src={slide.src}
+                      alt={slide.alt}
+                      className="h-full w-full object-cover transition-transform duration-700 ease-out hover:scale-105"
+                      loading={index === 0 ? "eager" : "lazy"}
+                    />
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-
-                      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-                        <Badge className="bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold py-1 px-3 shadow-lg">
-                          ⚡ Grabado Láser Integral
-                        </Badge>
-                        <Badge className="bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold py-1 px-3 shadow-lg flex items-center gap-1">
-                          <Flame className="h-3.5 w-3.5" /> 28% OFF Lanzamiento
-                        </Badge>
-                      </div>
-
-                      <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between rounded-xl bg-black/75 p-3 backdrop-blur-md border border-white/10 text-white">
-                        <div className="flex items-center gap-2">
-                          <div className="h-2.5 w-2.5 rounded-full bg-red-500 animate-ping" />
-                          <span className="text-xs font-bold uppercase tracking-wider text-red-300">
-                            ¡Solo {REMAINING_UNIDADES} unidades disponibles!
-                          </span>
-                        </div>
-                        <span className="text-xs text-neutral-300 font-mono">
-                          Acero 304 • 1.2L
-                        </span>
-                      </div>
-                    </div>
+                    {/* Sutil viñeta para integrar con el fondo */}
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
                   </div>
-
-                  <div className="lg:col-span-6 flex flex-col justify-center space-y-5">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex text-amber-400">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                          ))}
-                        </div>
-                        <span className="text-xs font-semibold text-muted-foreground">
-                          4.9/5 • Calidad Premium Garantizada
-                        </span>
-                      </div>
-
-                      <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight leading-tight">
-                        Termo Argentina Negro Mate{" "}
-                        <span className="text-sky-400">– Grabado Láser Integral</span>
-                      </h3>
-
-                      <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                        Termo de acero inoxidable negro mate con grabado láser integral inspirado en Argentina.
-                        Un diseño trabajado en todo el cuerpo del termo, combinando identidad nacional, ornamentación
-                        y detalles que resaltan con máxima elegancia sobre el acabado negro.
-                      </p>
-                    </div>
-
-                    {/* Características clave en pills */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      <div className="flex items-center gap-1.5 rounded-lg bg-secondary/60 px-3 py-2 text-xs font-medium text-foreground border border-border/50">
-                        <span>🇦🇷</span>
-                        <span>Diseño argentino</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 rounded-lg bg-secondary/60 px-3 py-2 text-xs font-medium text-foreground border border-border/50">
-                        <span>🔥</span>
-                        <span>Grabado integral</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 rounded-lg bg-secondary/60 px-3 py-2 text-xs font-medium text-foreground border border-border/50">
-                        <span>🖤</span>
-                        <span>Negro mate</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 rounded-lg bg-secondary/60 px-3 py-2 text-xs font-medium text-foreground border border-border/50">
-                        <span>💎</span>
-                        <span>Alta presencia visual</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 rounded-lg bg-secondary/60 px-3 py-2 text-xs font-medium text-foreground border border-border/50 sm:col-span-2">
-                        <span>🎁</span>
-                        <span>Ideal para regalo o uso diario</span>
-                      </div>
-                    </div>
-
-                    {/* Precios y Cuotas */}
-                    <div className="rounded-2xl border border-border bg-secondary/40 p-4 space-y-2.5">
-                      <div className="flex items-baseline gap-3">
-                        <span className="text-3xl sm:text-4xl font-black text-foreground font-mono">
-                          $48.900
-                        </span>
-                        <span className="text-lg text-muted-foreground line-through font-mono">
-                          $68.000
-                        </span>
-                        <Badge variant="destructive" className="font-bold text-xs">
-                          Ahorrás $19.100
-                        </Badge>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        <div className="flex items-center gap-2 text-foreground font-medium bg-background/60 p-2 rounded-lg border border-border/50">
-                          <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                          <span>3 Cuotas sin interés de <strong>$16.300</strong></span>
-                        </div>
-                        <div className="flex items-center gap-2 text-foreground font-medium bg-background/60 p-2 rounded-lg border border-border/50">
-                          <CheckCircle2 className="h-4 w-4 text-amber-400 shrink-0" />
-                          <span>15% OFF por Transferencia (<strong>$41.565</strong>)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Botones de acción directa */}
-                    <div className="flex flex-col sm:flex-row gap-3 pt-1">
-                      <Button
-                        size="lg"
-                        className="flex-1 text-base font-bold gap-2.5 h-13 shadow-xl hover:scale-[1.02] transition-transform bg-primary text-primary-foreground"
-                        onClick={handleAddToCart}
-                        disabled={isAdding}
-                      >
-                        <ShoppingCart className="h-5 w-5" />
-                        {isAdding ? "Agregando..." : "Comprar Ahora (Añadir al Carrito)"}
-                      </Button>
-
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        className="border-green-600/40 text-green-400 hover:bg-green-950/20 hover:text-green-300 font-semibold gap-2 h-13"
-                        asChild
-                      >
-                        <a
-                          href={`https://wa.me/${WHATSAPP_PHONE}?text=${whatsappMessage}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <MessageCircle className="h-5 w-5 text-green-500" />
-                          Pedir por WhatsApp
-                        </a>
-                      </Button>
-                    </div>
-
-                    {/* Garantías */}
-                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/60 text-center">
-                      <div className="flex flex-col items-center gap-1">
-                        <Truck className="h-4 w-4 text-sky-400" />
-                        <span className="text-[11px] font-medium text-muted-foreground">
-                          Envío a todo el país
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <ShieldCheck className="h-4 w-4 text-amber-400" />
-                        <span className="text-[11px] font-medium text-muted-foreground">
-                          Acero 304 Quirúrgico
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <Award className="h-4 w-4 text-emerald-400" />
-                        <span className="text-[11px] font-medium text-muted-foreground">
-                          Grabado Indeleble
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CarouselItem>
-
-              {/* SLIDE 2: ARGENTINA, grabada en cada detalle (Grabado Integral) */}
-              <CarouselItem>
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-6 sm:p-10 lg:p-12">
-                  <div className="lg:col-span-6 relative flex items-center justify-center">
-                    <div className="relative aspect-square w-full max-w-[460px] overflow-hidden rounded-2xl border border-border/80 bg-neutral-950 shadow-2xl group">
-                      <img
-                        src={imgDetail}
-                        alt="Detalle del grabado láser integral en termo negro mate"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-                      <div className="absolute top-4 left-4 z-10">
-                        <Badge className="bg-amber-500 text-black text-xs font-bold py-1 px-3 shadow-lg">
-                          ⚡ Grabado Láser de Cuerpo Completo
-                        </Badge>
-                      </div>
-                      <div className="absolute bottom-4 left-4 right-4 z-10 rounded-xl bg-black/80 p-3 text-xs text-neutral-300 backdrop-blur-md border border-white/10">
-                        Un diseño trabajado en todo el cuerpo del termo: no es un simple logo, es un grabado integral de máxima resolución.
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="lg:col-span-6 flex flex-col justify-center space-y-5">
-                    <Badge variant="outline" className="w-fit border-sky-400/40 text-sky-400">
-                      🇦🇷 Identidad y Cultura Argentina
-                    </Badge>
-
-                    <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">
-                      ARGENTINA, grabada en{" "}
-                      <span className="text-amber-400">cada detalle</span>
-                    </h3>
-
-                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                      Termo negro mate con grabado láser de cuerpo completo, con diseño argentino y terminación premium.
-                      Un termo pensado para quienes llevan la pasión a todas partes y buscan una pieza que realmente no pase desapercibida.
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                      <div className="flex items-start gap-3 rounded-xl bg-secondary/40 p-3.5 border border-border/60">
-                        <span className="text-xl">🔥</span>
-                        <div>
-                          <h4 className="text-sm font-bold text-foreground">Diseño exclusivo</h4>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            Ornamentación e iconografía nacional trabajada sobre todo el cuerpo del termo.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-3 rounded-xl bg-secondary/40 p-3.5 border border-border/60">
-                        <span className="text-xl">🖤</span>
-                        <div>
-                          <h4 className="text-sm font-bold text-foreground">Terminación negro mate</h4>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            Contraste de alto impacto visual entre el acero plateado del láser y el fondo mate.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-3 rounded-xl bg-secondary/40 p-3.5 border border-border/60">
-                        <span className="text-xl">⚡</span>
-                        <div>
-                          <h4 className="text-sm font-bold text-foreground">Grabado láser integral</h4>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            Indeleble de por vida: no se borra, no se raya y resiste el calor y lavados.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-3 rounded-xl bg-secondary/40 p-3.5 border border-border/60">
-                        <span className="text-xl">🎁</span>
-                        <div>
-                          <h4 className="text-sm font-bold text-foreground">Para regalar o llevar</h4>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            El regalo perfecto que despierta admiración en cada mateada.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 pt-3">
-                      <Button onClick={handleAddToCart} size="lg" className="gap-2 font-bold flex-1">
-                        <ShoppingCart className="h-4 w-4" />
-                        Quiero Mi Termo Integral ($48.900)
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="lg"
-                        onClick={() => handleScrollToSlide(2)}
-                        className="gap-2 text-xs sm:text-sm"
-                      >
-                        Ver Rendimiento
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CarouselItem>
-
-              {/* SLIDE 3: Rendimiento Térmico en Acero Doble Capa */}
-              <CarouselItem>
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-6 sm:p-10 lg:p-12">
-                  <div className="lg:col-span-6 flex flex-col justify-center space-y-6">
-                    <Badge variant="outline" className="w-fit border-amber-400/40 text-amber-400">
-                      ❄️ Rendimiento Térmico Extremo
-                    </Badge>
-
-                    <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">
-                      Doble Capa de Acero 304 al Vacío para la{" "}
-                      <span className="text-sky-400">Cebada Perfecta</span>
-                    </h3>
-
-                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                      Construido con tecnología bicapa de <strong>acero inoxidable 304</strong> y aislamiento
-                      al vacío. Conserva la temperatura de cebado del mate (75°C - 80°C) durante toda la jornada,
-                      sin transmitir calor al exterior de las paredes de acero.
-                    </p>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="rounded-xl border border-sky-500/30 bg-sky-950/20 p-4">
-                        <div className="flex items-center gap-2 text-sky-400 font-bold text-base sm:text-lg">
-                          <ThermometerSun className="h-5 w-5" />
-                          <span>24 Horas</span>
-                        </div>
-                        <p className="text-xs font-semibold text-foreground mt-1">Agua Caliente (Mate)</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">Temperatura constante sin pérdida de calor en el acero.</p>
-                      </div>
-
-                      <div className="rounded-xl border border-blue-500/30 bg-blue-950/20 p-4">
-                        <div className="flex items-center gap-2 text-blue-400 font-bold text-base sm:text-lg">
-                          <ThermometerSun className="h-5 w-5" />
-                          <span>36 Horas</span>
-                        </div>
-                        <p className="text-xs font-semibold text-foreground mt-1">Agua Helada (Tereré)</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">Mantiene cubos de hielo intactos bajo altas temperaturas.</p>
-                      </div>
-                    </div>
-
-                    <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-sky-400 shrink-0" />
-                        <span><strong>Pico Matero 360° Cebador:</strong> Caudal direccionado anti-goteo que no quema la yerba.</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-sky-400 shrink-0" />
-                        <span><strong>Acero Inoxidable SUS 304:</strong> Grado alimenticio, libre de BPA, no transmite olores ni sabores.</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-sky-400 shrink-0" />
-                        <span><strong>Manija reforzada ergonómica:</strong> Agarre firme y balanceado para cebadas seguras.</span>
-                      </li>
-                    </ul>
-
-                    <div className="pt-2">
-                      <Button onClick={handleAddToCart} size="lg" className="w-full sm:w-auto gap-2 font-bold">
-                        <ShoppingCart className="h-4 w-4" />
-                        Reservar 1 de las 5 Unidades
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="lg:col-span-6 relative flex items-center justify-center">
-                    <div className="relative aspect-square w-full max-w-[460px] overflow-hidden rounded-2xl border border-border/80 bg-neutral-950 shadow-2xl group">
-                      <img
-                        src={imgMain}
-                        alt="Rendimiento térmico en termo de acero inoxidable"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-                      <div className="absolute bottom-6 left-6 right-6 z-10 flex flex-col gap-2 rounded-xl bg-black/85 p-4 border border-white/10 backdrop-blur-md">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-white uppercase tracking-wider">Ficha Técnica de Acero</span>
-                          <span className="text-amber-400 font-mono">1200 ml</span>
-                        </div>
-                        <p className="text-xs text-neutral-300">
-                          Material: Acero Inoxidable 304 bicapa al vacío • Altura: 34 cm • Diámetro: 9.5 cm • Tapón cebador hermético.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CarouselItem>
-
-              {/* SLIDE 4: Experiencia Matera, Packaging & Garantía */}
-              <CarouselItem>
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-6 sm:p-10 lg:p-12">
-                  <div className="lg:col-span-6 relative flex items-center justify-center">
-                    <div className="relative aspect-square w-full max-w-[460px] overflow-hidden rounded-2xl border border-border/80 bg-neutral-950 shadow-2xl group">
-                      <img
-                        src={imgLifestyle}
-                        alt="Termo Argentina – Grabado Integral en mesa matera"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-                      <div className="absolute top-4 left-4 z-10">
-                        <Badge className="bg-sky-500 text-white text-xs font-bold py-1 px-3 shadow-lg">
-                          💎 Un termo que no pasa desapercibido
-                        </Badge>
-                      </div>
-                      <div className="absolute bottom-4 left-4 right-4 z-10 rounded-xl bg-black/80 p-3 text-xs text-neutral-300 backdrop-blur-md border border-white/10">
-                        Tu compañero inseparable de acero para viajes, rutas, asados y mañanas de mate.
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="lg:col-span-6 flex flex-col justify-center space-y-6">
-                    <Badge variant="outline" className="w-fit border-green-500/40 text-green-400">
-                      🎁 Combo Completo & Garantía Oficial
-                    </Badge>
-
-                    <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">
-                      El Termo de Acero Definitivo:{" "}
-                      <span className="text-amber-400">Listo para Regalar o Disfrutar</span>
-                    </h3>
-
-                    <div className="space-y-3">
-                      <div className="rounded-xl border border-border bg-secondary/30 p-4 space-y-2">
-                        <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
-                          <Award className="h-4 w-4 text-amber-400" />
-                          ¿Qué incluye tu compra hoy?
-                        </h4>
-                        <ul className="text-xs text-muted-foreground space-y-1.5 list-disc list-inside">
-                          <li>1x Termo de <strong>acero inoxidable 304</strong> de 1.2L con Grabado Láser Integral motivo Argentina.</li>
-                          <li>1x Tapón cebador matero 360° hermético anti-derrame.</li>
-                          <li>1x Tapa térmica de acero desmontable multifunción (funciona como vaso).</li>
-                          <li>1x Caja packaging rígido FREQ.AR con protección antichoque.</li>
-                          <li>Certificado de Garantía Térmica oficial FREQ.AR.</li>
-                        </ul>
-                      </div>
-
-                      <div className="flex items-center justify-between rounded-xl bg-card p-3.5 border border-sky-500/30">
-                        <div className="flex items-center gap-2.5">
-                          <Truck className="h-5 w-5 text-sky-400 shrink-0" />
-                          <div>
-                            <p className="text-xs font-bold text-foreground">Despacho Inmediato</p>
-                            <p className="text-[11px] text-muted-foreground">Disponible para entrega inmediata a todo el país con código de seguimiento.</p>
-                          </div>
-                        </div>
-                        <Badge className="bg-sky-500/20 text-sky-300 border-sky-500/40 text-[11px]">
-                          Todo el país
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 flex flex-col sm:flex-row gap-3">
-                      <Button
-                        size="lg"
-                        className="flex-1 font-bold gap-2 text-base shadow-xl bg-primary text-primary-foreground"
-                        onClick={handleAddToCart}
-                        disabled={isAdding}
-                      >
-                        <ShoppingCart className="h-5 w-5" />
-                        Aprovechar Últimas 5 Unidades
-                      </Button>
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        onClick={() => handleScrollToSlide(0)}
-                        className="gap-2 font-medium"
-                      >
-                        Volver a la Oferta
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CarouselItem>
+                </CarouselItem>
+              ))}
             </CarouselContent>
           </Carousel>
 
-          {/* Botones de navegación laterales */}
-          <div className="absolute top-1/2 -translate-y-1/2 left-4 z-20 hidden md:block">
-            <Button
-              variant="secondary"
-              size="icon"
-              className="h-11 w-11 rounded-full bg-background/80 backdrop-blur-md shadow-xl border border-border hover:scale-110 transition-transform"
-              onClick={() => api?.scrollPrev()}
-              aria-label="Slide anterior"
-            >
-              <ChevronLeft className="h-6 w-6 text-foreground" />
-            </Button>
-          </div>
-          <div className="absolute top-1/2 -translate-y-1/2 right-4 z-20 hidden md:block">
-            <Button
-              variant="secondary"
-              size="icon"
-              className="h-11 w-11 rounded-full bg-background/80 backdrop-blur-md shadow-xl border border-border hover:scale-110 transition-transform"
-              onClick={() => api?.scrollNext()}
-              aria-label="Slide siguiente"
-            >
-              <ChevronRight className="h-6 w-6 text-foreground" />
-            </Button>
+          {/* Contador sutil flotante en la esquina superior derecha */}
+          <div className="absolute top-4 right-4 z-10 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[11px] font-mono tracking-widest text-white/90">
+            {String(currentSlide + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
           </div>
 
-          {/* Indicadores inferiores (dots) */}
-          <div className="flex items-center justify-center gap-2 pb-6 pt-2 bg-card">
-            {slidesData.map((_, idx) => (
+          {/* Flechas de navegación sutiles (visibles al hover o en desktop) */}
+          <button
+            onClick={() => api?.scrollPrev()}
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white/80 hover:text-white hover:bg-black/75 transition-all flex items-center justify-center cursor-pointer shadow-lg opacity-80 sm:opacity-0 sm:group-hover:opacity-100"
+            aria-label="Imagen anterior"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          <button
+            onClick={() => api?.scrollNext()}
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white/80 hover:text-white hover:bg-black/75 transition-all flex items-center justify-center cursor-pointer shadow-lg opacity-80 sm:opacity-0 sm:group-hover:opacity-100"
+            aria-label="Imagen siguiente"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+
+          {/* Indicadores de puntos sutiles en la parte inferior de la imagen */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
+            {slides.map((_, idx) => (
               <button
                 key={idx}
-                onClick={() => handleScrollToSlide(idx)}
+                onClick={() => api?.scrollTo(idx)}
                 className={cn(
-                  "h-2.5 rounded-full transition-all cursor-pointer",
+                  "h-1.5 rounded-full transition-all duration-300 cursor-pointer",
                   currentSlide === idx
-                    ? "w-8 bg-sky-400"
-                    : "w-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                    ? "w-6 bg-white"
+                    : "w-1.5 bg-white/40 hover:bg-white/70"
                 )}
-                aria-label={`Ir al slide ${idx + 1}`}
+                aria-label={`Ver imagen ${idx + 1}`}
               />
             ))}
+          </div>
+        </div>
+
+        {/* Barra de acción sutil debajo del carrusel */}
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-card/60 border border-border/60 backdrop-blur-sm">
+          {/* Precio y beneficios */}
+          <div className="flex items-baseline gap-3 text-center sm:text-left">
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
+              $48.900
+            </span>
+            <span className="text-sm text-muted-foreground line-through font-mono">
+              $68.000
+            </span>
+            <span className="text-xs text-muted-foreground">
+              • 3 cuotas sin interés de $16.300
+            </span>
+          </div>
+
+          {/* Botones de acción */}
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            <Button
+              onClick={handleAddToCart}
+              disabled={isAdding}
+              className="flex-1 sm:flex-none font-semibold text-sm gap-2 h-11 px-6 shadow-md"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              {isAdding ? "Añadiendo..." : "Agregar al Carrito"}
+            </Button>
+
+            <Button
+              variant="outline"
+              className="font-medium text-sm gap-2 h-11 px-4 border-border/80 hover:bg-secondary"
+              asChild
+            >
+              <a
+                href={`https://wa.me/${WHATSAPP_PHONE}?text=${whatsappMessage}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="h-4 w-4 text-green-500" />
+                <span className="hidden xs:inline">WhatsApp</span>
+              </a>
+            </Button>
           </div>
         </div>
       </div>
