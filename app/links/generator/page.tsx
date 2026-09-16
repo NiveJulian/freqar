@@ -197,7 +197,14 @@ export default function QRGeneratorPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Teléfono WhatsApp:</span>
-                      <span className="text-foreground font-mono">+{selectedPet.phone}</span>
+                      <span className="text-foreground font-mono text-right">
+                        +{selectedPet.phone}
+                        {selectedPet.phone2 && (
+                          <span className="block text-[11px] text-muted-foreground">
+                            +{selectedPet.phone2} {selectedPet.phone2Name ? `(${selectedPet.phone2Name})` : ""}
+                          </span>
+                        )}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Ruta final:</span>
