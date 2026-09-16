@@ -154,13 +154,13 @@ export const petOwners: PetOwner[] = [
   },
   {
     id: "9",
-    ownerName: "Agustina Insaurrualde",
+    ownerName: "Joaquin Spilere & Agustina Insaurralde",
     petName: "Tino",
     petBreed: "Perro",
     petType: "dog",
-    phone: "5493772430927",
-    phone2: "5493772448967",
-    phone2Name: "Joaquin",
+    phone: "5493772448967",
+    phone2: "5493772430927",
+    phone2Name: "Agustina Insaurralde",
     message:
       "¡Hola! Encontré a tu perrito Tino. Escríbeme para coordinar la devolución.",
     avatarUrl: "",
